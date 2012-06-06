@@ -58,6 +58,7 @@ void TestClass::update(float time)
 	//入力＆描画テスト用変数更新
 	rot += 0.3f;
 	controller->update();
+
 	if(controller->getButtonState(CB_BUTTON_UP))
 		p.y -= 5.0f;
 	else if(controller->getButtonState(CB_BUTTON_DOWN))
