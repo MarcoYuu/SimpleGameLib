@@ -3,9 +3,20 @@
 #include <list>
 
 //-----------------------------------------------------------------------------------------------
+//時間計測用のインタフェース提供
+//-----------------------------------------------------------------------------------------------
+//継承しなくてもFPSCounterはgetTimeInSecondsがあればよい
+class ICountTime
+{
+public:
+	virtual ~ICountTime() {}
+	virtual double getTimeInSeconds() const = 0;
+};
+
+//-----------------------------------------------------------------------------------------------
 //clock()関数を用いた時間計測クラス
 //-----------------------------------------------------------------------------------------------
-class StdTimeCounter
+class StdTimeCounter : public ICountTime
 {
 public:
 	double getTimeInSeconds() const;
@@ -14,7 +25,7 @@ public:
 //-----------------------------------------------------------------------------------------------
 //マルチメディタイマを用いた時間計測クラス
 //-----------------------------------------------------------------------------------------------
-class MultiMediaCounter
+class MultiMediaCounter : public ICountTime
 {
 public:
 	MultiMediaCounter();
@@ -26,7 +37,7 @@ public:
 //-----------------------------------------------------------------------------------------------
 //clock()関数を用いた時間計測クラス
 //-----------------------------------------------------------------------------------------------
-class ClockFreqCounter
+class ClockFreqCounter : public ICountTime
 {
 private:
 	double mCPUFreqency;
@@ -111,11 +122,4 @@ void FrameRateCounter<Counter>::setAverageNum(size_t num)
 	update();
 }
 
-//時間計測用のインタフェース提供
-//継承しなくてもgetTimeInSecondsがあればよい
-class ICountTime
-{
-public:
-	virtual ~ICountTime() {}
-	virtual double getTimeInSeconds() const = 0;
-};
+

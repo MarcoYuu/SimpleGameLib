@@ -2,6 +2,7 @@
 
 #include <string>
 #include <tchar.h>
+#include <Unknwn.h>
 
 //COMポインタ用
 inline void intrusive_ptr_add_ref(IUnknown *p)

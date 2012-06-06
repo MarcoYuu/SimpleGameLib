@@ -8,6 +8,20 @@ namespace yuu
 // グラフィック描画関連
 namespace graphic
 {
+
+Size GetSize( WINDOW_SIZE size )
+{
+	switch(size)
+	{
+	case WS_640x480:	return Size(640, 480);
+	case WS_800x600:	return Size(800, 600);
+	case WS_1024x768:	return Size(1024, 768);
+	case WS_1280x960:	return Size(1280, 960);
+	case WS_1920x1080:	return Size(1920, 1080);
+	default:			return Size(640, 480);
+	}
+}
+
 //--------------------------------------------------------------------------------------------------
 //DirectX9デバイス管理クラス
 //--------------------------------------------------------------------------------------------------
@@ -21,40 +35,12 @@ GraphicDeviceManager::~GraphicDeviceManager()
 
 GraphicDevice GraphicDeviceManager::create(HWND hWnd, WINDOW_SIZE size, bool bWindowed, bool bVSync)
 {
-	int width, height;
-
-	switch(size)
-	{
-	case WS_640x480:
-		width = 640;
-		height = 480;
-		break;
-	case WS_800x600:
-		width = 800;
-		height = 600;
-		break;
-	case WS_1024x768:
-		width = 1024;
-		height = 768;
-		break;
-	case WS_1280x960:
-		width = 1280;
-		height = 960;
-		break;
-	case WS_1920x1080:
-		width = 1920;
-		height = 1080;
-		break;
-	default:
-		width = 640;
-		height = 480;
-		break;
-	}
+	Size back_buf_size =GetSize(size);
 
 	GraphicDevice device = new GraphicDeviceManager();
 	try
 	{
-		device->Init(hWnd, width, height, bWindowed, bVSync);
+		device->Init(hWnd, (int)back_buf_size.x, (int)back_buf_size.y, bWindowed, bVSync);
 	}
 	catch(...)
 	{
@@ -122,5 +108,6 @@ void GraphicDeviceManager::Init(HWND hWnd, int WindowWidth, int WindowHeight, bo
 	}
 	m_Direct3D9Device = device;
 }
+
 }
 }

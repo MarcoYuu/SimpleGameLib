@@ -89,7 +89,7 @@ private:
 //アプリケーションループの基礎クラス
 //--------------------------------------------------------------------------------
 // アプリケーションインタフェース
-class IApplication
+class IApplication :boost::noncopyable
 {
 public:
 	virtual ~IApplication() {}

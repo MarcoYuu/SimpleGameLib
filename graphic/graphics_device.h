@@ -47,6 +47,7 @@ enum WINDOW_SIZE
 	WS_1280x960,
 	WS_1920x1080
 };
+Size GetSize(WINDOW_SIZE);
 
 class GraphicDeviceManager;
 typedef boost::intrusive_ptr<GraphicDeviceManager> GraphicDevice;
