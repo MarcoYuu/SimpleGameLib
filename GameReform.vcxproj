@@ -83,6 +83,7 @@
     <ClInclude Include="audio\mta_coinitiarizer.h" />
     <ClInclude Include="audio\pcm_reader.h" />
     <ClInclude Include="game\game.h" />
+    <ClInclude Include="game\scene_manager.h" />
     <ClInclude Include="graphic\buffer_object.h" />
     <ClInclude Include="graphic\color.h" />
     <ClInclude Include="graphic\graphics.h" />
@@ -92,6 +93,7 @@
     <ClInclude Include="graphic\texture.h" />
     <ClInclude Include="input\input_direct_input.h" />
     <ClInclude Include="input\input_interface.h" />
+    <ClInclude Include="other\memory_manage_list.h" />
     <ClInclude Include="other\refference_count.h" />
     <ClInclude Include="other\frame_rate_counter.h" />
     <ClInclude Include="other\geometry.h" />
@@ -103,6 +105,7 @@
     <ClCompile Include="audio\audio_creator.cpp" />
     <ClCompile Include="audio\pcm_reader.cpp" />
     <ClCompile Include="game\game.cpp" />
+    <ClCompile Include="game\scene_manager.cpp" />
     <ClCompile Include="graphic\buffer_object.cpp" />
     <ClCompile Include="graphic\color.cpp" />
     <ClCompile Include="graphic\graphics_device.cpp" />

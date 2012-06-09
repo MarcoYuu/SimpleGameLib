@@ -103,8 +103,8 @@ void FrameRateCounter<Counter>::update()
 	mPastTimeList.pop_front();
 	mPastTimeList.push_back(diff);
 
-	mFPS = 10.0 / (mTotalTime + diff);
-	mTotalTime += diff - *mPastTimeList.begin();
+	mFPS = mNum / (mTotalTime + diff);
+	mTotalTime += diff - mPastTimeList.front();
 }
 
 template<typename Counter>

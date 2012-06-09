@@ -9,6 +9,7 @@
 #include "graphic/graphics.h"
 #include "other/frame_rate_counter.h"
 #include "game/game.h"
+#include "game/scene_manager.h"
 
 using namespace yuu;
 using namespace yuu::app;
@@ -17,6 +18,9 @@ using namespace yuu::audio;
 using namespace yuu::input;
 using namespace yuu::graphic;
 
+//-----------------------------------------------------------------------------------------------
+// ゲームクラステスト
+//-----------------------------------------------------------------------------------------------
 class TestClass : public Game
 {
 public:
@@ -30,9 +34,30 @@ protected:
 private:
 	SpriteBatch batch;
 	Texture tex;
-	Controller controller;
 	FrameRateCounter<> counter;
+
+	SceneManager manager;
 
 	Point2f p;
 	float rot;
+};
+
+//-----------------------------------------------------------------------------------------------
+// ゲームシーンテスト
+//-----------------------------------------------------------------------------------------------
+class TestScene : public IScene{
+	typedef IScene base;
+	SpriteBatch batch;
+	Texture tex;
+	Point2f p;
+	float rot;
+	Color color;
+
+public:
+	TestScene(SceneManagerComponent &manager);
+	static Scene create(SceneManagerComponent &manager);
+
+	void update(float time , bool other_has_focus, bool covered_by_other);
+	void updateOnActive(float time);
+	void draw(float time);
 };
