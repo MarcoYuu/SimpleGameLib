@@ -166,6 +166,11 @@ HWND WindowBase::getHandle() const
 	return m_hWnd;
 }
 
+bool WindowBase::isActive()
+{
+	return m_hWnd == ::GetActiveWindow();
+}
+
 void WindowBase::showCursor(bool show)
 {
 	::ShowCursor(show ? TRUE : FALSE);

@@ -89,7 +89,7 @@ Controller Game::getController() const
 
 bool Game::isActive() const
 {
-	return getWindow()->getHandle() == ::GetActiveWindow();
+	return getWindow()->isActive();
 }
 
 void Game::addComponent( GameComponent component, int priority )

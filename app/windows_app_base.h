@@ -60,7 +60,7 @@ public:
 	int getWidth() const;
 	int getHeight() const;
 	HWND getHandle() const;
-
+	bool isActive();
 	void setSize(int x, int y, int width, int height);
 	void setTitle(tstring title);
 
