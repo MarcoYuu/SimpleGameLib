@@ -6,7 +6,7 @@
 #include <boost/utility.hpp>
 
 template<typename T>
-class MemoyManageList :boost::noncopyable
+class MemoryManageList
 {
 public:
 	class iterator;
@@ -15,7 +15,7 @@ public:
 
 public:
 	// コンストラクタ
-	MemoyManageList(size_t max_num, size_t max_size)
+	MemoryManageList(size_t max_num, size_t max_size)
 		: MAX_ELEMENT_NUM(max_num)
 		, MAX_OBJECT_SIZE(max_size)
 		, free_num(max_num)
@@ -31,9 +31,25 @@ public:
 		// リストの初期化
 		resetList();
 	}
+	MemoryManageList(const MemoryManageList& rhs)
+		: MAX_ELEMENT_NUM(rhs.MAX_ELEMENT_NUM)
+		, MAX_OBJECT_SIZE(rhs.MAX_OBJECT_SIZE)
+		, free_num(rhs.MAX_ELEMENT_NUM)
+		, storage(rhs.storage)
+	{
+		// リストの初期化
+		resetList();
+	}
+	MemoryManageList& operator=(const MemoryManageList& rhs){
+		MAX_ELEMENT_NUM =rhs.MAX_ELEMENT_NUM;
+		MAX_OBJECT_SIZE =rhs.MAX_OBJECT_SIZE;
+		free_num =rhs.MAX_ELEMENT_NUM;
+		storage =rhs.storage;
+		resetList();
+	}
 
 	// デストラクタ
-	~MemoyManageList(){
+	~MemoryManageList(){
 		clear();
 	}
 
@@ -196,7 +212,7 @@ private:
 
 public:
 	class iterator {
-		friend class MemoyManageList;
+		friend class MemoryManageList;
 	public:
 		typedef T value_type;
 		inline iterator():current(NULL){}

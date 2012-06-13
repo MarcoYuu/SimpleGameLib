@@ -8,8 +8,10 @@
 #include "input/input_direct_input.h"
 #include "graphic/graphics.h"
 #include "other/frame_rate_counter.h"
+#include "other/memory_manage_list.h"
 #include "game/game.h"
 #include "game/scene_manager.h"
+
 
 using namespace yuu;
 using namespace yuu::app;
@@ -36,6 +38,49 @@ private:
 	SceneManager manager;
 };
 
+
+//-----------------------------------------------------------------------------------------------
+// テストオブジェクト
+//-----------------------------------------------------------------------------------------------
+class TestObject{
+public:
+	TestObject(GraphicDevice dev);
+
+	void update(Controller controller);
+	void draw();
+
+public:
+	class Bullet{
+	private:
+		Point2f position;
+		Vector2f velocity;
+		Vector2f accel;
+
+		TestObject *parent;
+
+	public:
+		Bullet(TestObject *p);
+		void init(const Point2f &pos, const Point2f &vel, const Point2f &acl);
+		bool update();
+		void draw();
+	};
+
+private:
+	GraphicDevice device;
+	SpriteBatch batch;
+	Texture tex;
+
+	int count;
+	float rot;
+
+	Point2f position;
+	Vector2f velocity;
+
+	static const int BULLET_NUM =2000;
+
+	MemoryManageList<Bullet> bullets;
+};
+
 //-----------------------------------------------------------------------------------------------
 // ゲームシーンテスト
 //-----------------------------------------------------------------------------------------------
@@ -53,12 +98,14 @@ private:
 
 	SpriteBatch batch;
 	Texture tex[2];
-
-	Point2f p;
-	float rot;
 	Color color;
+
+	float rot;
+
+	TestObject object;
 
 private:
 	void fade();
 	bool isFade() const;
 };
+

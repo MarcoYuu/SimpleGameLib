@@ -88,16 +88,16 @@ public:
 	}
 	const T dot(const Vector2 &rhs) const
 	{
-		return x * rhs.X + y * rhs.Y;
+		return x * rhs.x + y * rhs.y;
 	}
 	const T closs(const Vector2 &rhs) const
 	{
-		return x * rhs.X - y * rhs.Y;
+		return x * rhs.x - y * rhs.y;
 	}
 
 	bool operator==(const Vector2 &rhs) const
 	{
-		return (x == rhs.X && y == rhs.Y);
+		return (x == rhs.x && y == rhs.y);
 	}
 	bool operator!=(const Vector2 &rhs) const
 	{
@@ -114,14 +114,14 @@ public:
 	}
 	const Vector2 &operator+=(const Vector2 &rhs)
 	{
-		x += rhs.X;
-		y += rhs.Y;
+		x += rhs.x;
+		y += rhs.y;
 		return *this;
 	}
 	const Vector2 &operator-=(const Vector2 &rhs)
 	{
-		x -= rhs.X;
-		y -= rhs.Y;
+		x -= rhs.x;
+		y -= rhs.y;
 		return *this;
 	}
 	const Vector2 &operator*=(const T &rhs)
@@ -217,16 +217,16 @@ public:
 	}
 	const T dot(const Vector3 &rhs) const
 	{
-		return x * rhs.X + y * rhs.Y + z * rhs.Z;
+		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
 	const Vector3 closs(const Vector3 &rhs) const
 	{
-		return Vector3(y * rhs.Z - z * rhs.Y, z * rhs.X - x * rhs.Z, x * rhs.Y - y * rhs.X);
+		return Vector3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 	}
 
 	bool operator==(const Vector3 &rhs) const
 	{
-		return (x == rhs.X && y == rhs.Y && z == rhs.Z);
+		return (x == rhs.x && y == rhs.y && z == rhs.z);
 	}
 	bool operator!=(const Vector3 &rhs) const
 	{
@@ -243,16 +243,16 @@ public:
 	}
 	const Vector3 &operator+=(const Vector3 &rhs)
 	{
-		x += rhs.X;
-		y += rhs.Y;
-		z += rhs.Z;
+		x += rhs.x;
+		y += rhs.y;
+		z += rhs.z;
 		return *this;
 	}
 	const Vector3 &operator-=(const Vector3 &rhs)
 	{
-		x -= rhs.X;
-		y -= rhs.Y;
-		z -= rhs.Z;
+		x -= rhs.x;
+		y -= rhs.y;
+		z -= rhs.z;
 		return *this;
 	}
 	const Vector3 &operator*=(const T &rhs)
@@ -303,26 +303,26 @@ template<typename T>
 class Vector4
 {
 public:
-	T X, Y, Z, W;
+	T x, y, z, W;
 
 public:
-	Vector4(): X(0), Y(0), Z(0), W(0) {}
-	Vector4(T x, T y, T z, T w): X(x), Y(y), Z(z), W(w) {}
-	Vector4(const Vector3<T> &rhs): X(rhs.x), Y(rhs.y), Z(rhs.z), W(1.0) {}
-	Vector4(const Vector4 &rhs): X(rhs.X), Y(rhs.Y), Z(rhs.Z), W(rhs.W) {}
+	Vector4(): x(0), y(0), z(0), W(0) {}
+	Vector4(T x, T y, T z, T w): x(x), y(y), z(z), W(w) {}
+	Vector4(const Vector3<T> &rhs): x(rhs.x), y(rhs.y), z(rhs.z), W(1.0) {}
+	Vector4(const Vector4 &rhs): x(rhs.x), y(rhs.y), z(rhs.z), W(rhs.W) {}
 	Vector4 &operator=(const Vector3<T> &rhs)
 	{
-		X = rhs.x;
-		Y = rhs.y;
-		Z = rhs.z;
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
 		W = 1.0;
 		return *this;
 	}
 	Vector4 &operator=(const Vector4 &rhs)
 	{
-		X = rhs.X;
-		Y = rhs.Y;
-		Z = rhs.Z;
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
 		W = rhs.W;
 		return *this;
 	}
@@ -330,35 +330,35 @@ public:
 
 	void set(T x, T y, T z, T w)
 	{
-		X = x;
-		Y = y;
-		Z = z;
+		x = x;
+		y = y;
+		z = z;
 		W = w;
 	}
 	void set(const T *ary)
 	{
-		X = ary[0];
-		Y = ary[1];
-		Z = ary[2];
+		x = ary[0];
+		y = ary[1];
+		z = ary[2];
 		W = ary[3];
 	}
 
 	T *toAry()
 	{
-		return &X;
+		return &x;
 	}
 	const T *toAry() const
 	{
-		return &X;
+		return &x;
 	}
 
 	const T sumsq() const
 	{
-		return X * X + Y * Y + Z * Z + W * W;
+		return x * x + y * y + z * z + W * W;
 	}
 	const T sumsq3D() const
 	{
-		return X * X + Y * Y + Z * Z;
+		return x * x + y * y + z * z;
 	}
 	const T abs() const
 	{
@@ -370,20 +370,20 @@ public:
 	}
 	const T dot(const Vector4 &rhs) const
 	{
-		return X * rhs.X + Y * rhs.Y + Z * rhs.Z + W * rhs.W;
+		return x * rhs.x + y * rhs.y + z * rhs.z + W * rhs.W;
 	}
 	const T dot3D(const Vector4 &rhs) const
 	{
-		return X * rhs.X + Y * rhs.Y + Z * rhs.Z;
+		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
 	const Vector3<T> closs3D(const Vector4 &rhs) const
 	{
-		return Vector3<T>(Y * rhs.Z - Z * rhs.Y, Z * rhs.X - X * rhs.Z, X * rhs.Y - Y * rhs.X);
+		return Vector3<T>(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 	}
 
 	bool operator==(const Vector4 &rhs) const
 	{
-		return (X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W);
+		return (x == rhs.x && y == rhs.y && z == rhs.z && W == rhs.W);
 	}
 	bool operator!=(const Vector4 &rhs) const
 	{
@@ -396,37 +396,37 @@ public:
 	}
 	const Vector4 operator-()
 	{
-		return Vector4(-X, -Y, -Z, -W);
+		return Vector4(-x, -y, -z, -W);
 	}
 	const Vector4 &operator+=(const Vector4 &rhs)
 	{
-		X += rhs.X;
-		Y += rhs.Y;
-		Z += rhs.Z;
+		x += rhs.x;
+		y += rhs.y;
+		z += rhs.z;
 		W += rhs.W;
 		return *this;
 	}
 	const Vector4 &operator-=(const Vector4 &rhs)
 	{
-		X -= rhs.X;
-		Y -= rhs.Y;
-		Z -= rhs.Z;
+		x -= rhs.x;
+		y -= rhs.y;
+		z -= rhs.z;
 		W -= rhs.W;
 		return *this;
 	}
 	const Vector4 &operator*=(const T &rhs)
 	{
-		X *= rhs;
-		Y *= rhs;
-		Z *= rhs;
+		x *= rhs;
+		y *= rhs;
+		z *= rhs;
 		W *= rhs;
 		return *this;
 	}
 	const Vector4 &operator/=(const T &rhs)
 	{
-		X /= rhs;
-		Y /= rhs;
-		Z /= rhs;
+		x /= rhs;
+		y /= rhs;
+		z /= rhs;
 		W *= rhs;
 		return *this;
 	}
@@ -434,27 +434,27 @@ public:
 template<typename T>
 const Vector4<T> operator+(const Vector4<T> &lhs, const Vector4<T> &rhs)
 {
-	return Vector4<T>(lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z, lhs.W + rhs.W);
+	return Vector4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.W + rhs.W);
 }
 template<typename T>
 const Vector4<T> operator-(const Vector4<T> &lhs, const Vector4<T> &rhs)
 {
-	return Vector4<T>(lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z, lhs.W - rhs.W);
+	return Vector4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.W - rhs.W);
 }
 template<typename T, typename U>
 const Vector4<T> operator*(const U &lhs, const Vector4<T> &rhs)
 {
-	return Vector4<T>(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z, lhs * rhs.W);
+	return Vector4<T>(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.W);
 }
 template<typename T, typename U>
 const Vector4<T> operator*(const Vector4<T> &lhs, const U &rhs)
 {
-	return Vector4<T>(rhs * lhs.X, rhs * lhs.Y, rhs * lhs.Z, rhs * lhs.W);
+	return Vector4<T>(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z, rhs * lhs.W);
 }
 template<typename T, typename U>
 const Vector4<T> operator/(const Vector4<T> &lhs, const U &rhs)
 {
-	return Vector4<T>(lhs.X / rhs, lhs.Y / rhs, lhs.Y / rhs, lhs.W / rhs);
+	return Vector4<T>(lhs.x / rhs, lhs.y / rhs, lhs.y / rhs, lhs.W / rhs);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -464,55 +464,55 @@ template<typename T>
 class Quaternion
 {
 public:
-	T R, X, Y, Z;
+	T r, x, y, z;
 
 public:
-	Quaternion(): R(0), X(0), Y(0), Z(0) {}
-	Quaternion(T r, T x, T y, T z): R(r), X(x), Y(y), Z(z) {}
-	Quaternion(const Quaternion &rhs): R(rhs.R), X(rhs.X), Y(rhs.Y), Z(rhs.Z) {}
+	Quaternion(): r(0), x(0), y(0), z(0) {}
+	Quaternion(T r, T x, T y, T z): r(r), x(x), y(y), z(z) {}
+	Quaternion(const Quaternion &rhs): r(rhs.r), x(rhs.x), y(rhs.y), z(rhs.z) {}
 	Quaternion &operator=(const Quaternion &rhs)
 	{
-		R = rhs.R;
-		X = rhs.X;
-		Y = rhs.Y;
-		Z = rhs.Z;
+		r = rhs.r;
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
 		return *this;
 	}
 	~Quaternion() {}
 
 	void set(T r, T x, T y, T z)
 	{
-		R = r;
-		X = x;
-		Y = y;
-		Z = z;
+		r = r;
+		x = x;
+		y = y;
+		z = z;
 	}
 	void set(const T *ary)
 	{
-		R = ary[0];
-		X = ary[1];
-		Y = ary[2];
-		Z = ary[3];
+		r = ary[0];
+		x = ary[1];
+		y = ary[2];
+		z = ary[3];
 	}
 
 	void setConjugation()
 	{
-		X = -X;
-		Y = -Y;
-		Z = -Z;
+		x = -x;
+		y = -y;
+		z = -z;
 	}
 	const Quaternion getConjugation() const
 	{
-		return Quaternion(R, -X, -Y, -Z);
+		return Quaternion(r, -x, -y, -z);
 	}
 
 	void setRotation(T angle, T x, T y, T z)
 	{
 		T rot = angle / 2.0, _sin = sin(rot);
-		R = cos(rot);
-		X = x * _sin;
-		Y = y * _sin;
-		Z = z * _sin;
+		r = cos(rot);
+		x = x * _sin;
+		y = y * _sin;
+		z = z * _sin;
 	}
 	void setRotation(T angle, const Vector3<T> &axis)
 	{
@@ -531,16 +531,16 @@ public:
 
 	T *toAry()
 	{
-		return &R;
+		return &r;
 	}
 	const T *toAry() const
 	{
-		return &R;
+		return &r;
 	}
 
 	const T sumsq() const
 	{
-		return R * R + X * X + Y * Y + Z * Z;
+		return r * r + x * x + y * y + z * z;
 	}
 	const T abs() const
 	{
@@ -549,12 +549,12 @@ public:
 	const Quaternion inv() const
 	{
 		T abs = this->abs();
-		return Quaternion(R / abs, -X / abs, -Y / abs, -Z / abs);
+		return Quaternion(r / abs, -x / abs, -y / abs, -z / abs);
 	}
 
 	bool operator==(const Quaternion &rhs) const
 	{
-		return (R == rhs.R && X == rhs.X && Y == rhs.Y && Z == rhs.Z);
+		return (r == rhs.r && x == rhs.x && y == rhs.y && z == rhs.z);
 	}
 	bool operator!=(const Quaternion &rhs) const
 	{
@@ -567,72 +567,72 @@ public:
 	}
 	const Quaternion operator-()
 	{
-		return Quaternion(-R, -X, -Y, -Z);
+		return Quaternion(-r, -x, -y, -z);
 	}
 	const Quaternion &operator+=(const Quaternion &rhs)
 	{
-		R += rhs.R;
-		X += rhs.X;
-		Y += rhs.Y;
-		Z += rhs.Z;
+		r += rhs.r;
+		x += rhs.x;
+		y += rhs.y;
+		z += rhs.z;
 		return *this;
 	}
 	const Quaternion &operator-=(const Quaternion &rhs)
 	{
-		R -= rhs.R;
-		X -= rhs.X;
-		Y -= rhs.Y;
-		Z -= rhs.Z;
+		r -= rhs.r;
+		x -= rhs.x;
+		y -= rhs.y;
+		z -= rhs.z;
 		return *this;
 	}
 	const Quaternion &operator*=(const T &rhs)
 	{
-		R *= rhs.R;
-		X *= rhs;
-		Y *= rhs;
-		Z *= rhs;
+		r *= rhs.r;
+		x *= rhs;
+		y *= rhs;
+		z *= rhs;
 		return *this;
 	}
 	const Quaternion &operator/=(const T &rhs)
 	{
-		R /= rhs.R;
-		X /= rhs;
-		Y /= rhs;
-		Z /= rhs;
+		r /= rhs.r;
+		x /= rhs;
+		y /= rhs;
+		z /= rhs;
 		return *this;
 	}
 };
 template<typename T>
 const Quaternion<T> operator+(const Quaternion<T> &lhs, const Quaternion<T> &rhs)
 {
-	return Quaternion<T>(lhs.R + rhs.R, lhs.X + rhs.X, lhs.Y + rhs.Y, lhs.Z + rhs.Z);
+	return Quaternion<T>(lhs.r + rhs.r, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 }
 template<typename T>
 const Quaternion<T> operator-(const Quaternion<T> &lhs, const Quaternion<T> &rhs)
 {
-	return Quaternion<T>(lhs.R - rhs.R, lhs.X - rhs.X, lhs.Y - rhs.Y, lhs.Z - rhs.Z);
+	return Quaternion<T>(lhs.r - rhs.r, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 }
 template<typename T>
 const Quaternion<T> operator*(const T &lhs, const Quaternion<T> &rhs)
 {
-	return Quaternion<T>(lhs * rhs.R, lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z);
+	return Quaternion<T>(lhs * rhs.r, lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
 }
 template<typename T>
 const Quaternion<T> operator*(const Quaternion<T> &lhs, const T &rhs)
 {
-	return Quaternion<T>(rhs * lhs.R, rhs * lhs.X, rhs * lhs.Y, lhs * rhs.Z);
+	return Quaternion<T>(rhs * lhs.r, rhs * lhs.x, rhs * lhs.y, lhs * rhs.z);
 }
 template<typename T>
 const Quaternion<T> operator*(const Quaternion<T> &lhs, const Quaternion<T> &rhs)
 {
-	Vector3<T> l(lhs.X, lhs.Y, lhs.Z), r(rhs.X, rhs.Y, rhs.Z);
-	Vector3<T> vec = lhs.R * r + rhs.R * l + l.closs(r);
-	return Quaternion<T>(lhs.R * rhs.R - l.dot(r), vec.x, vec.y, vec.z);
+	Vector3<T> l(lhs.x, lhs.y, lhs.z), r(rhs.x, rhs.y, rhs.z);
+	Vector3<T> vec = lhs.r * r + rhs.r * l + l.closs(r);
+	return Quaternion<T>(lhs.r * rhs.r - l.dot(r), vec.x, vec.y, vec.z);
 }
 template<typename T>
 const Quaternion<T> operator/(const Quaternion<T> &lhs, const T &rhs)
 {
-	return Quaternion<T>(lhs.R / rhs, lhs.X / rhs, lhs.Y / rhs, lhs.Y / rhs);
+	return Quaternion<T>(lhs.r / rhs, lhs.x / rhs, lhs.y / rhs, lhs.y / rhs);
 }
 template<typename T>
 const Quaternion<T> operator/(const T &lhs, const Quaternion<T> &rhs)
@@ -869,21 +869,21 @@ public:
 	}
 	void setRotateAxis(T angle, const Vector3<T> &axis)
 	{
-		setRotateAxis(angle, axis.X, axis.Y, axis.Z);
+		setRotateAxis(angle, axis.x, axis.y, axis.z);
 	}
 	void setRotateFromQuaternion(const Quaternion<T> &q)
 	{
 		setIdentity();
 
-		m[0][0] = 1.0 - 2.0 * q.Y * q.Y - 2.0 * q.Z * q.Z;
-		m[0][1] = 2.0 * q.X * q.Y + 2.0 * q.R * q.Z;
-		m[0][2] = 2.0 * q.X * q.Z - 2.0 * q.R * q.Y;
-		m[1][0] = 2.0 * q.X * q.Y - 2.0 * q.R * q.Z;
-		m[1][1] = 1.0 - 2.0 * q.X * q.X - 2.0 * q.Z * q.Z;
-		m[1][2] = 2.0 * q.Y * q.Z + 2.0 * q.R * q.X;
-		m[2][0] = 2.0 * q.X * q.Z + 2.0 * q.R * q.Y;
-		m[2][1] = 2.0 * q.Y * q.Z - 2.0 * q.R * q.X;
-		m[2][2] = 1.0 - 2.0 * q.X * q.X - 2.0 * q.Y * q.Y;
+		m[0][0] = 1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z;
+		m[0][1] = 2.0 * q.x * q.y + 2.0 * q.r * q.z;
+		m[0][2] = 2.0 * q.x * q.z - 2.0 * q.r * q.y;
+		m[1][0] = 2.0 * q.x * q.y - 2.0 * q.r * q.z;
+		m[1][1] = 1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z;
+		m[1][2] = 2.0 * q.y * q.z + 2.0 * q.r * q.x;
+		m[2][0] = 2.0 * q.x * q.z + 2.0 * q.r * q.y;
+		m[2][1] = 2.0 * q.y * q.z - 2.0 * q.r * q.x;
+		m[2][2] = 1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y;
 	}
 
 	bool operator==(const Matrix4x4 &rhs) const
@@ -993,25 +993,25 @@ template<typename T>
 const Matrix4x4<T> operator*(const Matrix4x4<T> &lhs, const Vector3<T> &rhs)
 {
 	return Vector3<T>(
-			   lhs.X * rhs[0][0] + lhs.Y * rhs[0][1] + lhs.Z * rhs[0][2] + rhs[0][3],
-			   lhs.X * rhs[1][0] + lhs.Y * rhs[1][1] + lhs.Z * rhs[1][2] + rhs[1][3],
-			   lhs.X * rhs[2][0] + lhs.Y * rhs[2][1] + lhs.Z * rhs[2][2] + rhs[2][3]);
+			   lhs.x * rhs[0][0] + lhs.y * rhs[0][1] + lhs.z * rhs[0][2] + rhs[0][3],
+			   lhs.x * rhs[1][0] + lhs.y * rhs[1][1] + lhs.z * rhs[1][2] + rhs[1][3],
+			   lhs.x * rhs[2][0] + lhs.y * rhs[2][1] + lhs.z * rhs[2][2] + rhs[2][3]);
 }
 template<typename T>
 const Matrix4x4<T> operator*(const Vector4<T> &lhs, const Matrix4x4<T> &rhs)
 {
 	return Vector3<T>(
-			   lhs.X * rhs[0][0] + lhs.Y * rhs[1][0] + lhs.Z * rhs[2][0] + lhs.W * rhs[3][0],
-			   lhs.X * rhs[0][1] + lhs.Y * rhs[1][1] + lhs.Z * rhs[2][1] + lhs.W * rhs[3][1],
-			   lhs.X * rhs[0][2] + lhs.Y * rhs[1][2] + lhs.Z * rhs[2][2] + lhs.W * rhs[3][2]);
+			   lhs.x * rhs[0][0] + lhs.y * rhs[1][0] + lhs.z * rhs[2][0] + lhs.W * rhs[3][0],
+			   lhs.x * rhs[0][1] + lhs.y * rhs[1][1] + lhs.z * rhs[2][1] + lhs.W * rhs[3][1],
+			   lhs.x * rhs[0][2] + lhs.y * rhs[1][2] + lhs.z * rhs[2][2] + lhs.W * rhs[3][2]);
 }
 template<typename T>
 const Matrix4x4<T> operator*(const Matrix4x4<T> &lhs, const Vector4<T> &rhs)
 {
 	return Vector3<T>(
-			   lhs.X * rhs[0][0] + lhs.Y * rhs[0][1] + lhs.Z * rhs[0][2] + lhs.W * rhs[0][3],
-			   lhs.X * rhs[1][0] + lhs.Y * rhs[1][1] + lhs.Z * rhs[1][2] + lhs.W * rhs[1][3],
-			   lhs.X * rhs[2][0] + lhs.Y * rhs[2][1] + lhs.Z * rhs[2][2] + lhs.W * rhs[2][3]);
+			   lhs.x * rhs[0][0] + lhs.y * rhs[0][1] + lhs.z * rhs[0][2] + lhs.W * rhs[0][3],
+			   lhs.x * rhs[1][0] + lhs.y * rhs[1][1] + lhs.z * rhs[1][2] + lhs.W * rhs[1][3],
+			   lhs.x * rhs[2][0] + lhs.y * rhs[2][1] + lhs.z * rhs[2][2] + lhs.W * rhs[2][3]);
 }
 template<typename T>
 const Matrix4x4<T> operator*(const Matrix4x4<T> &lhs, const Matrix4x4<T> &rhs)

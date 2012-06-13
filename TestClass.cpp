@@ -1,5 +1,7 @@
 #include "TestClass.h"
+
 #include <cstdlib>
+#include <math.h>
 
 //-----------------------------------------------------------------------------------------------
 // ゲームクラステスト
@@ -56,8 +58,9 @@ void TestClass::update(float time)
 //-----------------------------------------------------------------------------------------------
 TestScene::TestScene( SceneManagerComponent &manager ) 
 	: base(manager)
-	, rot(0)
 	, color((Color::byte)rand()%256,(Color::byte)rand()%256,(Color::byte)rand()%256,(Color::byte)128)
+	, rot(0)
+	, object(getGraphicDevice())
 {
 	batch  = SpriteBatchSystem::create(getGraphicDevice(), 30);
 	tex[0] = TextureManager::create(getGraphicDevice(), _T("white.bmp"));
@@ -80,20 +83,9 @@ void TestScene::update( float time , bool other_has_focus, bool covered_by_other
 
 void TestScene::updateOnActive( float time )
 {
-	//入力＆描画テスト用変数更新
-	rot += 1.0f;
-
 	Controller controller =getController();
 
-	const float speed =10.0f;
-	if(controller->getButtonState(CB_BUTTON_UP))
-		p.y -= speed;
-	else if(controller->getButtonState(CB_BUTTON_DOWN))
-		p.y += speed;
-	if(controller->getButtonState(CB_BUTTON_LEFT))
-		p.x -= speed;
-	else if(controller->getButtonState(CB_BUTTON_RIGHT))
-		p.x += speed;
+	rot +=1.0f;
 
 	//シーン生成
 	if(controller->getButtonState(CB_BUTTON_1, JUST_DOWN))
@@ -107,6 +99,8 @@ void TestScene::updateOnActive( float time )
 		if(getSceneManager().getSceneNum() != 1)
 			exit();
 	}
+
+	object.update(getController());
 }
 
 void TestScene::draw( float time )
@@ -121,17 +115,19 @@ void TestScene::draw( float time )
 		batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
 		batch->begin();
 		{
-			batch->draw(p, Color::Yellow, 1.0f, rot);
-			batch->draw(Point2f(200, 200), Color::Cyan, 3, p.x / 100);
-			batch->draw(Point2f(300 + 50 * cos(rot / 10), 300 + 50 * sin(rot / 10)));
-
+			Size size =getGraphicDevice()->getBackBufferSize();
 			for (int i=0; i<9; ++i){
 				batch->draw(
-					Point2f(600 + 500 * cos(rot / 30 +i*0.7f), 500 + 350 * sin(rot / 30+i*0.7f)),
+					Point2f(
+					size.x/2 + 500 * cos(rot / 30 +i*0.7f), 
+					size.y/2 + 350 * sin(rot / 30+i*0.7f)),
 					color&0x80ffffff,4,0);
 			}
 		}
 		batch->end();
+
+		// オブジェクト描画
+		object.draw();
 	}
 
 	// フェードアウト
@@ -148,7 +144,9 @@ bool TestScene::isFade() const{
 
 void TestScene::fade()
 {
-	if(getState() == TRANSITION_OFF)
+	switch(getState())
+	{
+	case TRANSITION_OFF:
 	{
 		batch->setTexture(tex[0]);
 		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
@@ -159,8 +157,11 @@ void TestScene::fade()
 			Point2f(win_size.x/2, win_size.y/2), 
 			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
 			win_size.x, 0);
-		batch->end();
-	}else if(getState() == TRANSITION_ON){
+		batch->end();			
+	}break;
+
+	case TRANSITION_ON:
+	{
 		batch->setTexture(tex[0]);
 		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
 		Size win_size =getGraphicDevice()->getBackBufferSize();
@@ -171,5 +172,122 @@ void TestScene::fade()
 			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
 			win_size.x, 0);
 		batch->end();
+	}break;
 	}
+}
+
+//-----------------------------------------------------------------------------------------------
+// テストオブジェクト
+//-----------------------------------------------------------------------------------------------
+TestObject::TestObject( GraphicDevice dev ) 
+	: device(dev)
+	, batch()
+	, tex()
+	, count(0)
+	, rot(0)
+	, position(0,0)
+	, velocity(10,10)
+	, bullets(BULLET_NUM, sizeof(Bullet))
+{
+	batch =SpriteBatchSystem::create(dev, BULLET_NUM);
+	tex =TextureManager::create(dev, _T("test.png"));
+}
+
+void TestObject::update( Controller controller )
+{
+	if(controller->getButtonState(CB_BUTTON_UP))
+		position.y -= velocity.y;
+	else if(controller->getButtonState(CB_BUTTON_DOWN))
+		position.y += velocity.y;
+	if(controller->getButtonState(CB_BUTTON_LEFT))
+		position.x -= velocity.x;
+	else if(controller->getButtonState(CB_BUTTON_RIGHT))
+		position.x += velocity.x;
+
+	// 弾発射
+	const int interval =2;
+	if(controller->getButtonState(CB_BUTTON_6) && count > interval)
+	{
+		Point2f vel;
+		Bullet* b;
+
+		for (int i=0;i<4;++i)
+		{
+			vel.set(10*cos(rot+i*(float)M_PI/4),10*sin(rot+i*(float)M_PI/4));
+			b =bullets.construct<Bullet>(this);
+			b!=NULL?b->init(position, vel, vel*0.01f):0;
+			b =bullets.construct<Bullet>(this);
+			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
+
+			vel.set(10*cos(-rot-i*(float)M_PI/4),10*sin(-rot-i*(float)M_PI/4));
+			b =bullets.construct<Bullet>(this);
+			b!=NULL?b->init(position, vel, vel*0.01f):0;
+			b =bullets.construct<Bullet>(this);
+			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
+		}
+	}
+	++count;
+	rot += 0.1f;
+
+	MemoryManageList<Bullet>::iterator it=bullets.begin(), end =bullets.end();
+	while (it!=end)
+	{
+		if(!it->update()){
+			it =bullets.erase(it);
+			continue;
+		}
+		++it;
+	}
+}
+
+void TestObject::draw()
+{
+	batch->setTexture(tex);
+	batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
+	batch->begin();
+	batch->draw(position);
+	MemoryManageList<Bullet>::iterator it=bullets.begin(), end =bullets.end();
+	while (it!=end)
+	{
+		it->draw();
+		++it;
+	}
+	batch->end();
+}
+
+TestObject::Bullet::Bullet( TestObject *p ) 
+	: position(0,0)
+	, velocity(0,0)
+	, accel(0,0)
+	, parent(p)
+{
+
+}
+
+void TestObject::Bullet::init( const Point2f &pos, const Point2f &vel, const Point2f &acl )
+{
+	position =pos;
+	velocity =vel;
+	accel    =acl;
+}
+
+bool TestObject::Bullet::update()
+{
+	position +=velocity;
+	velocity +=accel;
+	const int padding =90;
+	Size win =parent->device->getBackBufferSize();
+	if (win.x +padding < position.x || 
+		win.y +padding <position.y ||
+		-padding > position.x || 
+		-padding >position.y)
+	{
+		return false;
+	}
+	return true;
+}
+
+void TestObject::Bullet::draw()
+{
+	parent->batch->draw(position, Color::White&0x80ffffff, 0.5, 0);
 }
