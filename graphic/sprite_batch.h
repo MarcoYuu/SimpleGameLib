@@ -64,12 +64,12 @@ private:
 private:
 	struct SpriteVertex
 	{
-		float x, y, z;	// D3DFVF_XYZ
+		float x, y;//,z	// D3DFVF_XYZ
 		DWORD color;	// D3DFVF_DIFFUSE
 		float scale;	// D3DFVF_TEX1
 		float rotation;	// D3DFVF_TEX1
-		float depth;	// D3DFVF_TEX2
-		float index;	// D3DFVF_TEX2
+		float depth;	// D3DFVF_TEX1
+		float index;	// D3DFVF_TEX1
 	};
 	typedef std::vector<SpriteVertex> SpriteVertexList;
 

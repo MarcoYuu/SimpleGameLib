@@ -3,6 +3,7 @@
 #include <list>
 #include <cmath>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/utility.hpp>
 
 #include "game.h"
 #include "../other/refference_count.h"
@@ -16,9 +17,30 @@ typedef boost::intrusive_ptr<IScene> Scene;
 typedef boost::intrusive_ptr<SceneManagerComponent> SceneManager;
 
 //-----------------------------------------------------------------------------------------------
+// シーンマネージャ
+//-----------------------------------------------------------------------------------------------
+class SceneManagerComponent :public IGameComponent, boost::noncopyable
+{
+public:
+	SceneManagerComponent();
+	~SceneManagerComponent();
+	static SceneManager create();
+
+	void addScene(Scene scene);
+	void update(float time);
+	void draw(float time);
+	void removeScene( Scene scene );
+	void removeScene( IScene *scene );
+	size_t getSceneNum() const;
+
+private:
+	typedef std::list<Scene> SceneList;
+	SceneList m_scene;
+};
+
+//-----------------------------------------------------------------------------------------------
 // ゲームシーン
 //-----------------------------------------------------------------------------------------------
-
 // アクティブ：
 // 　　シーンスタックの一番上にいてかつフォーカスを得ている状態です
 // 　　フォーカスを得ることができないとき、getState()はACTIVEをかえす
@@ -27,15 +49,14 @@ typedef boost::intrusive_ptr<SceneManagerComponent> SceneManager;
 // 　　シーンスタックで二番目以降のシーンの状態です
 // 　　この状態では描画・更新ともに基本的には行われませんが
 // 　　トップのシーンがPopup状態の時、その下のシーンは描画のみ行われます
-
 enum SceneState{
-	TRANSITION_ON,	//シーンがアクティブになっている途中です
-	TRANSITION_OFF,	//シーンが非アクティブになっている途中です
-	ACTIVE,			//シーンは完全にアクティブです
-	HIDDEN			//シーンは完全に非アクティブです
+	TRANSITION_ON,	// シーンがアクティブになっている途中です		getState()!= 0,1 減少中
+	TRANSITION_OFF,	// シーンが非アクティブになっている途中です	getState()!= 0,1 上昇中
+	ACTIVE,			// シーンは完全にアクティブです				getState()!= 0
+	HIDDEN			// シーンは完全に非アクティブです				getState()!= 1 
 };
 
-class IScene :public IRefferenceCount<IScene>
+class IScene :public IRefferenceCount<IScene>, boost::noncopyable
 {
 public:
 	virtual ~IScene(){}
@@ -45,6 +66,7 @@ public:
 	bool isActive() const;
 	bool hasFocus() const;
 	SceneState getState() const;
+	double getTransitionState() const; 
 
 	// マネージャによって更新時に常に呼び出される
 	// オーバーライド先で必ず呼び出さなくてはならない
@@ -80,32 +102,11 @@ private:
 	bool m_have_focus;
 	double m_transition_on_time;
 	double m_transition_off_time;
-	double m_transition_state;
+	double m_transition_state; //Active:0, Hidden:1 
 	SceneState m_state;
 	SceneManagerComponent &m_manager;
 
 	bool updateTransition(float time, double transition_time, int direction);
-};
-
-//-----------------------------------------------------------------------------------------------
-// シーンマネージャ
-//-----------------------------------------------------------------------------------------------
-class SceneManagerComponent :public IGameComponent
-{
-public:
-	SceneManagerComponent();
-	~SceneManagerComponent();
-	static SceneManager create(){return SceneManager(new SceneManagerComponent());}
-
-	void addScene(Scene scene);
-	void update(float time);
-	void draw(float time);
-	void removeScene( Scene scene );
-	void removeScene( IScene *scene );
-
-private:
-	typedef std::list<Scene> SceneList;
-	SceneList m_scene;
 };
 
 }

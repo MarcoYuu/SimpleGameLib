@@ -32,27 +32,14 @@ protected:
 	void draw(float time);
 
 private:
-	SpriteBatch batch;
-	Texture tex;
 	FrameRateCounter<> counter;
-
 	SceneManager manager;
-
-	Point2f p;
-	float rot;
 };
 
 //-----------------------------------------------------------------------------------------------
 // ゲームシーンテスト
 //-----------------------------------------------------------------------------------------------
 class TestScene : public IScene{
-	typedef IScene base;
-	SpriteBatch batch;
-	Texture tex;
-	Point2f p;
-	float rot;
-	Color color;
-
 public:
 	TestScene(SceneManagerComponent &manager);
 	static Scene create(SceneManagerComponent &manager);
@@ -60,4 +47,18 @@ public:
 	void update(float time , bool other_has_focus, bool covered_by_other);
 	void updateOnActive(float time);
 	void draw(float time);
+
+private:
+	typedef IScene base;
+
+	SpriteBatch batch;
+	Texture tex[2];
+
+	Point2f p;
+	float rot;
+	Color color;
+
+private:
+	void fade();
+	bool isFade() const;
 };

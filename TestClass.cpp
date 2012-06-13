@@ -6,8 +6,6 @@
 //-----------------------------------------------------------------------------------------------
 TestClass::TestClass()
 	:Game(_T("test app"), WS_1280x960, false, true)
-	,p()
-	,rot(0.0f)
 	,manager()
 {
 
@@ -15,19 +13,17 @@ TestClass::TestClass()
 
 void TestClass::initializeResources()
 {
-	//グラフィック関係の作成
-	batch  = SpriteBatchSystem::create(getGraphicDevice(), 10);
-	tex    = TextureManager::create(getGraphicDevice(), _T("test.png"));
-
 	//入力デバイスの初期化
 	getController()->setConfigMouse(CB_BUTTON_0, (MOUSE_BUTTON)BUTTON_NONE);
 
 	//コンポーネントの追加
 	manager =SceneManagerComponent::create();
 	addComponent(manager);
+	manager->addScene(Scene(new TestScene(*manager)));
 
 	counter.setAverageNum(30);
 }
+
 void TestClass::draw(float time)
 {
 	GraphicDevice device =getGraphicDevice();
@@ -41,46 +37,17 @@ void TestClass::draw(float time)
 	device->device()->Clear(
 	0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET,
 	D3DCOLOR_XRGB(80, 5, 46), 1.0f, 0);
-
-	//スプライト描画開始
-	batch->setTexture(tex);
-	batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
-	batch->begin();
-	{
-		batch->draw(p, Color::Yellow, 1.0f, rot);
-		batch->draw(Point2f(200, 200), Color::Cyan, 3, p.x / 100);
-		batch->draw(Point2f(300 + 50 * cos(rot / 10), 300 + 50 * sin(rot / 10)));
-	}
-	batch->end();
-	batch->blendMode(SpriteBatchSystem::BLEND_NOUSE_ALPHA);
 }
 
 void TestClass::update(float time)
 {
-	//入力＆描画テスト用変数更新
-	rot += 0.3f;
-
-	Controller controller =getController();
-
-	if(controller->getButtonState(CB_BUTTON_UP))
-		p.y -= 5.0f;
-	else if(controller->getButtonState(CB_BUTTON_DOWN))
-		p.y += 5.0f;
-	if(controller->getButtonState(CB_BUTTON_LEFT))
-		p.x -= 5.0f;
-	else if(controller->getButtonState(CB_BUTTON_RIGHT))
-		p.x += 5.0f;
+	if(manager->getSceneNum()==0)
+		manager->addScene(TestScene::create(*manager));
 
 	//終了判定
-	if(controller->getButtonState(CB_BUTTON_0))
+	if(getController()->getButtonState(CB_BUTTON_0))
 	{
 		getWindow()->destroy();
-	}
-
-	//シーン生成
-	if(controller->getButtonState(CB_BUTTON_1, JUST_DOWN))
-	{
-		manager->addScene(Scene(new TestScene(*manager)));
 	}
 }
 
@@ -92,8 +59,12 @@ TestScene::TestScene( SceneManagerComponent &manager )
 	, rot(0)
 	, color((Color::byte)rand()%256,(Color::byte)rand()%256,(Color::byte)rand()%256,(Color::byte)128)
 {
-	batch  = SpriteBatchSystem::create(getGraphicDevice(), 10);
-	tex    = TextureManager::create(getGraphicDevice(), _T("test.png"));
+	batch  = SpriteBatchSystem::create(getGraphicDevice(), 30);
+	tex[0] = TextureManager::create(getGraphicDevice(), _T("white.bmp"));
+	tex[1] = TextureManager::create(getGraphicDevice(), _T("test.png"));
+	
+	this->setTransitionOffTime(0.8);
+	this->setTransitionOnTime(0.8);
 }
 
 yuu::game::Scene TestScene::create( SceneManagerComponent &manager )
@@ -103,17 +74,38 @@ yuu::game::Scene TestScene::create( SceneManagerComponent &manager )
 
 void TestScene::update( float time , bool other_has_focus, bool covered_by_other )
 {
-	// 隠れても描画するように
-	base::update(time, other_has_focus, false);
+	// 隠れても描画するようにするには base::update(time, other_has_focus, false);
+	base::update(time, other_has_focus, covered_by_other);
 }
 
 void TestScene::updateOnActive( float time )
 {
-	rot +=1.0f;
-	//終了判定
+	//入力＆描画テスト用変数更新
+	rot += 1.0f;
+
+	Controller controller =getController();
+
+	const float speed =10.0f;
+	if(controller->getButtonState(CB_BUTTON_UP))
+		p.y -= speed;
+	else if(controller->getButtonState(CB_BUTTON_DOWN))
+		p.y += speed;
+	if(controller->getButtonState(CB_BUTTON_LEFT))
+		p.x -= speed;
+	else if(controller->getButtonState(CB_BUTTON_RIGHT))
+		p.x += speed;
+
+	//シーン生成
+	if(controller->getButtonState(CB_BUTTON_1, JUST_DOWN))
+	{
+		getSceneManager().addScene(Scene(new TestScene(getSceneManager())));
+	}
+
+	//シーン終了判定
 	if(getController()->getButtonState(CB_BUTTON_2, JUST_DOWN))
 	{
-		exit();
+		if(getSceneManager().getSceneNum() != 1)
+			exit();
 	}
 }
 
@@ -121,44 +113,63 @@ void TestScene::draw( float time )
 {
 	GraphicDevice device =getGraphicDevice();
 
-	//スプライト描画開始
-	batch->setTexture(tex);
-	batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
-	batch->begin();
+	//フェードアウト中は書かない 
+	if(!isFade())
 	{
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30), 500 + 350 * sin(rot / 30)),
-			color&0x80ffffff
-		);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+0.7f), 500 + 350 * sin(rot / 30+0.7f)),
-			color&0x80ffffff
-		);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+1.5f), 500 + 350 * sin(rot / 30+1.5f)),
-			color&0x80ffffff
-		);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+2.2f), 500 + 350 * sin(rot / 30+2.2f)),
-			color&0x80ffffff
-		);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+0.3f), 500 + 350 * sin(rot / 30+0.3f)),
-			color&0x80ffffff
-			);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+1.0f), 500 + 350 * sin(rot / 30+1.0f)),
-			color&0x80ffffff
-			);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+1.8f), 500 + 350 * sin(rot / 30+1.8f)),
-			color&0x80ffffff
-			);
-		batch->draw(
-			Point2f(600 + 500 * cos(rot / 30+2.5f), 500 + 350 * sin(rot / 30+2.5f)),
-			color&0x80ffffff
-			);
+		//スプライト描画開始
+		batch->setTexture(tex[1]);
+		batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
+		batch->begin();
+		{
+			batch->draw(p, Color::Yellow, 1.0f, rot);
+			batch->draw(Point2f(200, 200), Color::Cyan, 3, p.x / 100);
+			batch->draw(Point2f(300 + 50 * cos(rot / 10), 300 + 50 * sin(rot / 10)));
+
+			for (int i=0; i<9; ++i){
+				batch->draw(
+					Point2f(600 + 500 * cos(rot / 30 +i*0.7f), 500 + 350 * sin(rot / 30+i*0.7f)),
+					color&0x80ffffff,4,0);
+			}
+		}
+		batch->end();
 	}
-	batch->end();
+
+	// フェードアウト
+	fade();
+
 	batch->blendMode(SpriteBatchSystem::BLEND_NOUSE_ALPHA);
+}
+
+bool TestScene::isFade() const{
+	return !((getState() == ACTIVE) 
+		|| (getState()==TRANSITION_ON && getTransitionState()<=0.5) 
+		|| (getState()==TRANSITION_OFF && getTransitionState()<=0.5));
+}
+
+void TestScene::fade()
+{
+	if(getState() == TRANSITION_OFF)
+	{
+		batch->setTexture(tex[0]);
+		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
+		Size win_size =getGraphicDevice()->getBackBufferSize();
+		double alpha =getTransitionState();
+		batch->begin();
+		batch->draw(
+			Point2f(win_size.x/2, win_size.y/2), 
+			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
+			win_size.x, 0);
+		batch->end();
+	}else if(getState() == TRANSITION_ON){
+		batch->setTexture(tex[0]);
+		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
+		Size win_size =getGraphicDevice()->getBackBufferSize();
+		double alpha =1-getTransitionState();
+		batch->begin();
+		batch->draw(
+			Point2f(win_size.x/2, win_size.y/2), 
+			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
+			win_size.x, 0);
+		batch->end();
+	}
 }

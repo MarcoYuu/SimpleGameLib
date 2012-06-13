@@ -56,6 +56,11 @@ SceneManagerComponent& IScene::getSceneManager() const
 	return m_manager;
 }
 
+double IScene::getTransitionState() const
+{
+	return m_transition_state;
+}
+
 void IScene::setIsPopup( bool flag )
 {
 	m_is_popup =flag;
@@ -92,10 +97,10 @@ void IScene::update( float time , bool other_has_focus, bool covered_by_other )
 		else
 			m_state = HIDDEN;
 	}
-	// シーンがアクティブの時
+	// それ以外の時
 	else
 	{
-		// アクティブ状態へ移行中
+		// 基本的に何もないならアクティブ状態へ移行
 		if (updateTransition(time, m_transition_on_time, -1))
 			m_state = TRANSITION_ON;
 		// 完全アクティブ
@@ -106,16 +111,16 @@ void IScene::update( float time , bool other_has_focus, bool covered_by_other )
 
 bool IScene::updateTransition( float time, double transition_time, int direction )
 {
-	double transitio_delta;
+	double transition_delta;
 
 	// 待ちが0なら一気に移動、それ以外ならtransition_timeで移行完了するようにする
 	if (transition_time == 0)
-		transitio_delta = 1;
+		transition_delta = 1;
 	else
-		transitio_delta = (double)time/transition_time;
+		transition_delta = (double)time/transition_time;
 
 	// 移行位置を更新します。
-	m_transition_state += transitio_delta * direction;
+	m_transition_state += transition_delta * direction;
 
 	// 移行の最後(1 or 0)に到達したかどうか
 	if (((direction < 0) && (m_transition_state <= 0)) ||
@@ -144,9 +149,14 @@ void IScene::exit()
 //-----------------------------------------------------------------------------------------------
 // シーンマネージャ
 //-----------------------------------------------------------------------------------------------
-SceneManagerComponent::SceneManagerComponent() :IGameComponent()
+SceneManagerComponent::SceneManagerComponent() 
+	:IGameComponent()
 {
+}
 
+yuu::game::SceneManager SceneManagerComponent::create()
+{
+	return SceneManager(new SceneManagerComponent());
 }
 
 SceneManagerComponent::~SceneManagerComponent()
@@ -201,7 +211,7 @@ void SceneManagerComponent::draw( float time )
 		// 完全に隠れたものに関しては描画しない
 		if ((*it)->getState() == HIDDEN)
 			continue;
-
+		
 		(*it)->draw(time);
 	}
 }
@@ -219,6 +229,11 @@ void SceneManagerComponent::removeScene( IScene *scene )
 void SceneManagerComponent::addScene( Scene scene )
 {
 	m_scene.push_back(scene);
+}
+
+size_t SceneManagerComponent::getSceneNum() const
+{
+	return m_scene.size();
 }
 
 }

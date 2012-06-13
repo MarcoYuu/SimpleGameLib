@@ -53,8 +53,10 @@ void SpriteBatchSystem::end()
 	// 状態設定
 	m_effect->SetTechnique("ParameterVertex");
 	m_effect->SetFloatArray("ViewportSize", m_device->getBackBufferSize().toAry(), 2);
-	m_effect->SetFloatArray("TextureSize", m_texture->getSize().toAry(), 2);
-	m_effect->SetTexture("Texture", m_texture->get());
+	if(m_texture!=NULL && m_texture->get()!=NULL){
+		m_effect->SetFloatArray("TextureSize", m_texture->getSize().toAry(), 2);
+		m_effect->SetTexture("Texture", m_texture->get());
+	}
 
 	// パスの開始
 	UINT num_pass;
@@ -64,7 +66,7 @@ void SpriteBatchSystem::end()
 		// 描画する頂点の設定
 		m_device->device()->SetStreamSource(0, m_vertex_buff->get(), 0, sizeof(SpriteVertex));
 		m_device->device()->SetIndices(m_index_buff->get());
-		m_device->device()->SetTexture(0, m_texture->get());
+		//m_device->device()->SetTexture(0, m_texture->get());
 
 		// 頂点宣言の設定
 		m_device->device()->SetVertexDeclaration(m_declaration.get());
@@ -130,7 +132,7 @@ void SpriteBatchSystem::draw(const Point2f &position, const Color &color, float 
 		{
 			m_vertex_list[cur_index + i].x = position.x;
 			m_vertex_list[cur_index + i].y = position.y;
-			m_vertex_list[cur_index + i].z = 0;
+			//m_vertex_list[cur_index + i].z = 0;
 			m_vertex_list[cur_index + i].color = color;
 			m_vertex_list[cur_index + i].scale = scale;
 			m_vertex_list[cur_index + i].rotation = rotation;
@@ -175,8 +177,8 @@ void SpriteBatchSystem::createEffect()
 	D3DVERTEXELEMENT9 VtxElem[] =
 	{
 		{0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-		{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-		{0, 16, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+		{0, 8, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+		{0, 12, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
 		D3DDECL_END()
 	};
 	IDirect3DVertexDeclaration9 *declaration;

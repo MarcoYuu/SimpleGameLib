@@ -15,11 +15,15 @@ namespace yuu
 // グラフィック描画関連
 namespace graphic
 {
+	
+class TextureManager;
+class WritableTextureManager;
+typedef boost::intrusive_ptr<TextureManager> Texture;
+typedef boost::intrusive_ptr<WritableTextureManager> WritableTexture;
+
 //--------------------------------------------------------------------------------------------------
 // テクスチャ
 //--------------------------------------------------------------------------------------------------
-class TextureManager;
-typedef boost::intrusive_ptr<TextureManager> Texture;
 
 class TextureManager
 	: public IRefferenceCount<TextureManager>
@@ -27,17 +31,17 @@ class TextureManager
 {
 public:
 	static Texture create(GraphicDevice device, const tstring &filename);
-	~TextureManager()
-	{}
+	virtual ~TextureManager(){}
 
 	Size getSize();
 	IDirect3DTexture9 *get();
 
-private:
+protected:
+	TextureManager(){};
+	TextureManager(GraphicDevice device, const tstring &filename);
+
 	boost::intrusive_ptr<IDirect3DTexture9> texture;
 	Size size;
-
-	TextureManager(GraphicDevice device, const tstring &filename);
 };
 }
 }
