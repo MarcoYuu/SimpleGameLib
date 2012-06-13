@@ -5,11 +5,11 @@
 //
 // 0.3
 #pragma once
-#pragma warning(disable:4290)
+
 
 #include <xaudio2.h>
 #include <string>
-#include <stdexcept>
+
 #include "../other/refference_count.h"
 
 // ©•ª‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Ì–¼‘O‹óŠÔ

@@ -73,7 +73,7 @@ private:
 
 	size_t mNum;
 
-	void update();
+	double update();
 };
 
 template<typename Counter>
@@ -94,7 +94,7 @@ FrameRateCounter<Counter>::~FrameRateCounter()
 }
 
 template<typename Counter>
-void FrameRateCounter<Counter>::update()
+double FrameRateCounter<Counter>::update()
 {
 	double cur_time = mCounter.getTimeInSeconds();
 	double diff = cur_time - mPrevTime;
@@ -105,6 +105,8 @@ void FrameRateCounter<Counter>::update()
 
 	mFPS = mNum / (mTotalTime + diff);
 	mTotalTime += diff - mPastTimeList.front();
+
+	return diff;
 }
 
 template<typename Counter>

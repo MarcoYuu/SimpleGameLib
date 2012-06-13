@@ -5,8 +5,6 @@
 
 #pragma once
 
-#pragma warning(disable:4290)
-
 #include <windows.h>
 
 #include <boost/intrusive_ptr.hpp>

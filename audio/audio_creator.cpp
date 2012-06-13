@@ -4,6 +4,7 @@
 // 			XAudio2‚ğ—p‚¢‚½‰¹ºÄ¶ƒNƒ‰ƒX‚ÌÀ‘•
 //
 // 0.3
+#pragma warning(disable:4290)
 
 #include <ctime>
 #include <cstring>

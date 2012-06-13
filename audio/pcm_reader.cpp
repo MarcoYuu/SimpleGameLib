@@ -1,3 +1,7 @@
+
+
+#pragma warning(disable:4290)
+
 #include <cstring>
 #include <fstream>
 #include "pcm_reader.h"

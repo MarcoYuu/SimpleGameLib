@@ -3,6 +3,8 @@
 //
 // 0.2
 
+#pragma warning(disable:4290)
+
 #include <cassert>
 #include <stdexcept>
 #include "windows_app_base.h"

@@ -37,23 +37,55 @@ public:
 		clear();
 	}
 
-	size_t size() const{return MAX_ELEMENT_NUM-free_num;}
-	size_t capacity() const{return MAX_ELEMENT_NUM;}
+	inline size_t size() const{return MAX_ELEMENT_NUM-free_num;}
+	inline size_t capacity() const{return MAX_ELEMENT_NUM;}
 
-	iterator begin(){return iterator(head_active.next);}
-	iterator end(){return iterator(&head_active);}
-	const_iterator begin() const{return iterator(head_active.next);}
-	const_iterator end() const{return iterator(&head_active);}
+	inline iterator begin(){return iterator(head_active.next);}
+	inline iterator end(){return iterator(&head_active);}
+	inline const_iterator begin() const{return iterator(head_active.next);}
+	inline const_iterator end() const{return iterator(&head_active);}
 
 	// すべて破棄
 	void clear(){
 		// すべての使用中オブジェクトを開放
 		for (Node* n =head_active.next; n!=&head_active; n =n->next)
-		{
 			node_cast(n)->~value_type();
-		}
 		// リストのリセット
 		resetList();
+	}
+
+	void pop_back(){
+		if(head_active.next == &head_active)
+			return;
+
+		// 使用済みリストから外す
+		Node *back       =head_active.prev;
+		node_cast(back)->~value_type();
+		head_active.prev =back->prev;
+		back->prev->next =&head_active;
+
+		// 未使用リストに追加
+		back->next       =head_free.next;
+		back->prev       =&head_free;
+		back->next->prev =back;
+		head_free.next   =back;
+	}
+
+	void pop_front(){
+		if(head_active.next == &head_active)
+			return;
+
+		// 使用済みリストから外す
+		Node *front       =head_active.next;
+		node_cast(front)->~value_type();
+		head_active.next =front->next;
+		front->next->prev =&head_active;
+
+		// 未使用リストに追加
+		front->next       =head_free.next;
+		front->prev       =&head_free;
+		front->next->prev =front;
+		head_free.next    =front;
 	}
 
 	iterator erase(const iterator &it){
@@ -81,30 +113,28 @@ public:
 
 	// 引数0で一つ追加
 	template<typename Class>
-	bool construct(){
+	Class* construct(){
 		// 最大サイズがT未満ならアサート
 		assert(MAX_OBJECT_SIZE>=sizeof(Class));
 
 		void* mem =getNextFreeStorage();
 		if (mem != NULL){
-			new(mem) Class();
-			return true;
+			return new(mem) Class();
 		}
-		return false;
+		return NULL;
 	}
 
 	// 引数1で一つ追加
 	template<typename Class, typename Arg>
-	bool construct(Arg arg){
+	Class* construct(Arg arg){
 		// 最大サイズがT未満ならアサート
 		assert(MAX_OBJECT_SIZE>=sizeof(Class));
 
 		void* mem =getNextFreeStorage();
 		if (mem != NULL){
-			new(mem) Class(arg);
-			return true;
+			return new(mem) Class(arg);
 		}
-		return false;
+		return NULL;
 	}
 
 private:
@@ -123,7 +153,7 @@ private:
 
 private:
 	inline static value_type* node_cast(Node* node){
-		return (value_type*)(&node->memory[0]);
+		return (value_type*)(node->memory.data());
 	}
 
 	void* getNextFreeStorage(){
@@ -169,38 +199,38 @@ public:
 		friend class MemoyManageList;
 	public:
 		typedef T value_type;
-		iterator():current(NULL){}
-
+		inline iterator():current(NULL){}
+		
 		// 間接参照演算子
-		value_type& operator*(){return *node_cast(current);}
-		const value_type& operator*() const{return *node_cast(current);}
-		value_type* operator->(){return node_cast(current);}
-		const value_type* operator->() const{return node_cast(current);}
+		inline value_type& operator*(){return *node_cast(current);}
+		inline const value_type& operator*() const{return *node_cast(current);}
+		inline value_type* operator->(){return node_cast(current);}
+		inline const value_type* operator->() const{return node_cast(current);}
 
 		// イテレータ操作
-		iterator operator++(){
+		inline iterator operator++(){
 			current = current->next;
 			return *this;
 		}
-		iterator operator--(){
+		inline iterator operator--(){
 			current = current->prev;
 			return *this;
 		}
-		iterator operator++(int){
+		inline iterator operator++(int){
 			iterator result(*this);
 			current = current->next
-				return result;
+			return result;
 		}
-		iterator operator--(int){
+		inline iterator operator--(int){
 			iterator result(*this);
 			current = current->prev;
 			return result;
 		}
-		bool operator==(const iterator& rhs) const{return current==rhs.current;}
-		bool operator!=(const iterator& rhs) const{return !(*this==rhs);}
+		inline bool operator==(const iterator& rhs) const{return current==rhs.current;}
+		inline bool operator!=(const iterator& rhs) const{return !(*this==rhs);}
 
 	private:
-		iterator(Node* n):current(n){}
+		inline iterator(Node* n):current(n){}
 		Node *current;
 	};
 

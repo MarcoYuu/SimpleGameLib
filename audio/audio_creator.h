@@ -5,7 +5,6 @@
 //
 // 0.3
 #pragma once
-#pragma warning(disable:4290)
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>

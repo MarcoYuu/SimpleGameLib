@@ -11,7 +11,6 @@
 #endif
 
 #include <dinput.h>
-#include <stdexcept>
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
