@@ -4,7 +4,7 @@
 int WINAPI WinMain(
 	HINSTANCE hCurInst, HINSTANCE hPrevInst, LPSTR lpsCmdLine, int nCmdShow)
 {
-	TestClass app;
+	TestClass app(WS_320x240);
 	app.run();
 
 	return 0;

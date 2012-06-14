@@ -6,11 +6,12 @@
 //-----------------------------------------------------------------------------------------------
 // ゲームクラステスト
 //-----------------------------------------------------------------------------------------------
-TestClass::TestClass()
-	:Game(_T("test app"), WS_1280x960, false, true)
-	,manager()
+Size TestClass::real_win_size;
+TestClass::TestClass(WINDOW_SIZE size)
+	: Game(_T("test app"), size, false, true)
+	, manager()
 {
-
+	real_win_size =getGraphicDevice()->getBackBufferSize();
 }
 
 void TestClass::initializeResources()
@@ -51,6 +52,16 @@ void TestClass::update(float time)
 	{
 		getWindow()->destroy();
 	}
+}
+
+Point2f TestClass::NormalizeCoord( Point2f &point )
+{
+	return point *=WindowSizeRatio();
+}
+
+float TestClass::WindowSizeRatio()
+{
+	return real_win_size.x/DefaultScreenWidth;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -116,12 +127,13 @@ void TestScene::draw( float time )
 		batch->begin();
 		{
 			Size size =getGraphicDevice()->getBackBufferSize();
+			float ratio =TestClass::WindowSizeRatio();
 			for (int i=0; i<9; ++i){
 				batch->draw(
 					Point2f(
-					size.x/2 + 500 * cos(rot / 30 +i*0.7f), 
-					size.y/2 + 350 * sin(rot / 30+i*0.7f)),
-					color&0x80ffffff,4,0);
+					size.x/2 + 500 *ratio *cos(rot / 30 +i*0.7f), 
+					size.y/2 + 350 *ratio *sin(rot / 30 +i*0.7f)),
+					color&0x80ffffff, 4*ratio,0);
 			}
 		}
 		batch->end();
@@ -190,7 +202,7 @@ TestObject::TestObject( GraphicDevice dev )
 	, bullets(BULLET_NUM, sizeof(Bullet))
 {
 	batch =SpriteBatchSystem::create(dev, BULLET_NUM);
-	tex =TextureManager::create(dev, _T("test.png"));
+	tex   =TextureManager::create(dev, _T("test.png"));
 }
 
 void TestObject::update( Controller controller )
@@ -210,16 +222,19 @@ void TestObject::update( Controller controller )
 	{
 		Point2f vel;
 		Bullet* b;
+		float ratio =TestClass::WindowSizeRatio();
 
 		for (int i=0;i<4;++i)
 		{
 			vel.set(10*cos(rot+i*(float)M_PI/4),10*sin(rot+i*(float)M_PI/4));
+			vel *=ratio;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, vel, vel*0.01f):0;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
 
 			vel.set(10*cos(-rot-i*(float)M_PI/4),10*sin(-rot-i*(float)M_PI/4));
+			vel *=ratio;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, vel, vel*0.01f):0;
 			b =bullets.construct<Bullet>(this);
@@ -245,7 +260,7 @@ void TestObject::draw()
 	batch->setTexture(tex);
 	batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
 	batch->begin();
-	batch->draw(position);
+	batch->draw(position, Color::White, TestClass::WindowSizeRatio(),0);
 	MemoryManageList<Bullet>::iterator it=bullets.begin(), end =bullets.end();
 	while (it!=end)
 	{
@@ -275,10 +290,10 @@ bool TestObject::Bullet::update()
 {
 	position +=velocity;
 	velocity +=accel;
-	const int padding =90;
+	const int padding =(int)(90 *TestClass::WindowSizeRatio());
 	Size win =parent->device->getBackBufferSize();
 	if (win.x +padding < position.x || 
-		win.y +padding <position.y ||
+		win.y +padding < position.y ||
 		-padding > position.x || 
 		-padding >position.y)
 	{
@@ -289,5 +304,5 @@ bool TestObject::Bullet::update()
 
 void TestObject::Bullet::draw()
 {
-	parent->batch->draw(position, Color::White&0x80ffffff, 0.5, 0);
+	parent->batch->draw(position, Color::White&0x80ffffff, 0.5f*TestClass::WindowSizeRatio(), 0);
 }

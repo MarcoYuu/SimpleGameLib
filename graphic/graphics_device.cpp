@@ -13,6 +13,7 @@ Size GetSize( WINDOW_SIZE size )
 {
 	switch(size)
 	{
+	case WS_320x240:	return Size(320, 240);
 	case WS_640x480:	return Size(640, 480);
 	case WS_800x600:	return Size(800, 600);
 	case WS_1024x768:	return Size(1024, 768);

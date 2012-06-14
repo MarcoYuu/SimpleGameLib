@@ -26,7 +26,12 @@ using namespace yuu::graphic;
 class TestClass : public Game
 {
 public:
-	TestClass();
+	TestClass(WINDOW_SIZE);
+
+	static const size_t DefaultScreenWidth =1280;
+	static const size_t DefaultScreenHeight =960;
+	static Point2f NormalizeCoord(Point2f &point);
+	static float WindowSizeRatio();
 
 protected:
 	void initializeResources();
@@ -36,6 +41,8 @@ protected:
 private:
 	FrameRateCounter<> counter;
 	SceneManager manager;
+
+	static Size real_win_size;
 };
 
 
