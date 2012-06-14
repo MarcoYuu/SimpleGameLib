@@ -203,6 +203,8 @@ TestObject::TestObject( GraphicDevice dev )
 {
 	batch =SpriteBatchSystem::create(dev, BULLET_NUM);
 	tex   =TextureManager::create(dev, _T("test.png"));
+
+	velocity *=TestClass::WindowSizeRatio();;
 }
 
 void TestObject::update( Controller controller )
