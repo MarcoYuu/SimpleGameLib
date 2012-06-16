@@ -9,8 +9,8 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include "../other/refference_count.h"
-#include "../other/utility.h"
+#include <other/refference_count.h>
+#include <other/utility.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -38,7 +38,7 @@ typedef boost::intrusive_ptr<IAudioBase> IAudio;
 void InitAudio();
 
 // オーディオのタイプ
-enum AUDIOTYPE
+enum AudioType
 {
 	NORMAL,		// 単一の音をすべて読み込み再生します。初期状態はループしません。 valueは無視されます。
 	STREAMING,	// 単一の音をストリーミングしつつ再生します。初期状態はループします。valueは無視されます。
@@ -52,7 +52,7 @@ enum AUDIOTYPE
 // 再生機が破棄された時点で使用されていたリソースは破棄されます。
 // 指定ファイルが見つからないか、再生インタフェースの作成に失敗したとき
 // この関数は失敗し、その場合はIAudioにヌルポインタを返します。
-IAudio CreateAudio(const tstring &filename, AUDIOTYPE type, std::size_t value = 1);
+IAudio CreateAudio(const tstring &filename, AudioType type, size_t value = 1);
 
 //--------------------------------------------------------------------------------------
 //オーディオのインタフェース

@@ -1,8 +1,9 @@
+
 #pragma once
 
-// include hedders for convenient
-#include "graphics_device.h"
-#include "color.h"
-#include "buffer_object.h"
-#include "texture.h"
-#include "sprite_batch.h"
+// include 
+#include <graphic/graphics_device.h>
+#include <graphic/sprite_batch.h>
+#include <graphic/color.h>
+#include <graphic/texture.h>
+#include <graphic/buffer_object.h>

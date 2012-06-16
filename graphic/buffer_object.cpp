@@ -1,5 +1,9 @@
+
+
 #include <d3dx9.h>
-#include "buffer_object.h"
+
+#include <graphic/graphics_device.h>
+#include <graphic/buffer_object.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -10,82 +14,118 @@ namespace graphic
 //--------------------------------------------------------------------------------------------------
 // 書き込み専用頂点バッファ
 //--------------------------------------------------------------------------------------------------
+struct WriteOnlyVertexBufferObject::Param{
+	GraphicDevice device;
+	boost::intrusive_ptr<IDirect3DVertexBuffer9> vertex_buff;
+	size_t size;
+
+	Param(GraphicDevice device_, size_t size_)
+		: device(device_)
+		, size(size_)
+	{}
+};
 WriteOnlyVertexBufferObject::WriteOnlyVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf)
-	: m_device(device)
-	, m_size(size)
+	: param(new Param(device, size))
 {
 	// 頂点バッファの作成
 	IDirect3DVertexBuffer9 *buff;
-	if(FAILED(device->device()->CreateVertexBuffer(
+	IDirect3DDevice9* dev =(IDirect3DDevice9*)device->getHandle();
+	if(FAILED(dev->CreateVertexBuffer(
 				  size, D3DUSAGE_WRITEONLY, fvf, D3DPOOL_MANAGED, &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}
-	m_vertex_buff = buff;
+	param->vertex_buff = buff;
 }
 
-yuu::graphic::VertexBuffer WriteOnlyVertexBufferObject::create(GraphicDevice device, size_t size, DWORD fvf)
+WriteOnlyVertexBufferObject::~WriteOnlyVertexBufferObject()
+{
+	delete param;
+}
+
+VertexBuffer WriteOnlyVertexBufferObject::create(GraphicDevice device, size_t size, DWORD fvf)
 {
 	return VertexBuffer(new WriteOnlyVertexBufferObject(device, size, fvf));
 }
 
-size_t WriteOnlyVertexBufferObject::write(void *data, size_t size)
+size_t WriteOnlyVertexBufferObject::write(const void *data, size_t size)
 {
 	void *dest;
-	if(FAILED(m_vertex_buff->Lock(0, size, (void **)&dest, 0)))
+	if(FAILED(param->vertex_buff->Lock(0, size, (void **)&dest, 0)))
 		return false;
 
 	memcpy(dest, data, size);
-	m_vertex_buff->Unlock();
+	param->vertex_buff->Unlock();
 
-	return 0;
+	return size;
 }
 
 size_t WriteOnlyVertexBufferObject::length() const
 {
-	return m_size;
+	return param->size;
 }
 
-IDirect3DVertexBuffer9 *WriteOnlyVertexBufferObject::get() const
+void* WriteOnlyVertexBufferObject::getHandle()
 {
-	return m_vertex_buff.get();
+	return param->vertex_buff.get();
+}
+
+const void* WriteOnlyVertexBufferObject::getHandle() const
+{
+	return param->vertex_buff.get();
 }
 
 //--------------------------------------------------------------------------------------------------
 // 動的変更用頂点バッファ
 //--------------------------------------------------------------------------------------------------
+struct DynamicVertexBufferObject::Param{
+	GraphicDevice device;
+	boost::intrusive_ptr<IDirect3DVertexBuffer9> vertex_buff;
+	size_t max_size;
+	size_t current_pos;
+
+	Param(GraphicDevice device_, size_t size_)
+		: device(device_)
+		, max_size(size_)
+		, current_pos(0)
+	{}
+};
 DynamicVertexBufferObject::DynamicVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf)
-	: m_device(device)
-	, m_max_size(size)
-	, m_current_pos(0)
+	: param(new Param(device, size))
 {
 	// 頂点バッファの作成
 	// Dynamicの場合D3DPOOL_DEFAULTでなければならないらしい
 	// ただし、デバイスロスト時に確実に失われるので復旧が必須
 	IDirect3DVertexBuffer9 *buff;
-	if(FAILED(device->device()->CreateVertexBuffer(
+	IDirect3DDevice9* dev =(IDirect3DDevice9*)device->getHandle();
+	if(FAILED(dev->CreateVertexBuffer(
 				  size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, fvf, D3DPOOL_DEFAULT, &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}
-	m_vertex_buff = buff;
+	param->vertex_buff = buff;
 }
 
-yuu::graphic::VertexBuffer DynamicVertexBufferObject::create(GraphicDevice device, size_t size, DWORD fvf)
+DynamicVertexBufferObject::~DynamicVertexBufferObject()
+{
+	delete param;
+}
+
+VertexBuffer DynamicVertexBufferObject::create(GraphicDevice device, size_t size, DWORD fvf)
 {
 	return VertexBuffer(new DynamicVertexBufferObject(device, size, fvf));
 }
 
-size_t DynamicVertexBufferObject::write(void *data, size_t size)
+size_t DynamicVertexBufferObject::write(const void *data, size_t size)
 {
 	// 現在の末尾
-	size_t position = m_current_pos;
+	size_t position = param->current_pos;
 
 	// 残りのスペースに書き込める限り「上書きなし」指定
 	DWORD lock_flag = D3DLOCK_NOOVERWRITE;
 
 	// 残りのバッファに収まるか判定
-	if(m_max_size <= position + size)
+	if(param->max_size <= position + size)
 	{
 		lock_flag = D3DLOCK_DISCARD;
 		position = 0;
@@ -93,68 +133,99 @@ size_t DynamicVertexBufferObject::write(void *data, size_t size)
 
 	// 書き込み
 	void *dest;
-	if(FAILED(m_vertex_buff->Lock(position, size, &dest, lock_flag)))
+	if(FAILED(param->vertex_buff->Lock(position, size, &dest, lock_flag)))
 		return false;
 	memcpy(dest, data, size);
-	m_vertex_buff->Unlock();
+	param->vertex_buff->Unlock();
 
 	// 書き込んだ分だけずらす
-	m_current_pos += size;
+	param->current_pos += size;
 
 	return position;
 }
 
 size_t DynamicVertexBufferObject::length() const
 {
-	return m_max_size;
+	return param->max_size;
 }
 
-IDirect3DVertexBuffer9 *DynamicVertexBufferObject::get() const
+void* DynamicVertexBufferObject::getHandle()
 {
-	return m_vertex_buff.get();
+	return param->vertex_buff.get();
+}
+
+const void* DynamicVertexBufferObject::getHandle() const
+{
+	return param->vertex_buff.get();
 }
 
 //--------------------------------------------------------------------------------------------------
 // インデックスバッファ
 //--------------------------------------------------------------------------------------------------
+struct IndexBufferObject::Param{
+	boost::intrusive_ptr<IDirect3DIndexBuffer9> index_buff;
+	size_t size;
+
+	Param(size_t size_)
+		: size(size_)
+	{}
+};
 IndexBufferObject::IndexBufferObject(GraphicDevice device, IndexFormat format, size_t size)
-	: m_size(size)
+	: param(new Param(size))
 {
 	// インデックスバッファの作成
 	IDirect3DIndexBuffer9 *buff;
-	if(FAILED(device->device()->CreateIndexBuffer(
-				  size , D3DUSAGE_WRITEONLY , (D3DFORMAT)format , D3DPOOL_MANAGED , &buff, NULL)))
+	IDirect3DDevice9* dev =(IDirect3DDevice9*)device->getHandle();
+	D3DFORMAT d3dformat;
+	switch(format){
+	case SIZE_16BIT: d3dformat =D3DFMT_INDEX16; break;
+	case SIZE_32BIT: d3dformat =D3DFMT_INDEX32; break;
+	}
+	if(FAILED(dev->CreateIndexBuffer(
+				  size , D3DUSAGE_WRITEONLY , d3dformat, D3DPOOL_MANAGED , &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}
-	m_index_buff = buff;
+	param->index_buff = buff;
 }
+
+IndexBufferObject::~IndexBufferObject()
+{
+	delete param;
+}
+
 
 yuu::graphic::IndexBuffer IndexBufferObject::create(GraphicDevice device, IndexFormat format, size_t size)
 {
 	return IndexBuffer(new IndexBufferObject(device, format, size));
 }
 
-bool IndexBufferObject::write(void *data, size_t size)
+size_t IndexBufferObject::write(const void *data, size_t size)
 {
 	void *dest;
-	if(FAILED(m_index_buff->Lock(0, 0, (void **)&dest, 0)))
-		return false;
+	if(FAILED(param->index_buff->Lock(0, 0, (void **)&dest, 0)))
+		return -1;
 
 	memcpy(dest, data, size);
-	m_index_buff->Unlock();
+	param->index_buff->Unlock();
 
-	return true;
+	return size;
 }
 
 size_t IndexBufferObject::length() const
 {
-	return m_size;
+	return param->size;
 }
 
-IDirect3DIndexBuffer9 *IndexBufferObject::get() const
+void* IndexBufferObject::getHandle()
 {
-	return m_index_buff.get();
+	return param->index_buff.get();
 }
+
+const void* IndexBufferObject::getHandle() const
+{
+	return param->index_buff.get();
+}
+
 }
 }

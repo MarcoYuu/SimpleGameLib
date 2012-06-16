@@ -7,7 +7,7 @@
 // ゲームクラステスト
 //-----------------------------------------------------------------------------------------------
 Size TestClass::real_win_size;
-TestClass::TestClass(WINDOW_SIZE size)
+TestClass::TestClass(BackBufferSize size)
 	: Game(_T("test app"), size, false, true)
 	, manager()
 {
@@ -17,13 +17,14 @@ TestClass::TestClass(WINDOW_SIZE size)
 void TestClass::initializeResources()
 {
 	//入力デバイスの初期化
-	getController()->setConfigMouse(CB_BUTTON_0, (MOUSE_BUTTON)BUTTON_NONE);
+	getController()->setConfigMouse(CB_BUTTON_0, (MouseButton)BUTTON_NONE);
 
 	//コンポーネントの追加
 	manager =SceneManagerComponent::create();
 	addComponent(manager);
-	manager->addScene(Scene(new TestScene(*manager)));
 
+	manager->addScene(Scene(new TestScene(*manager)));
+	
 	counter.setAverageNum(30);
 }
 
@@ -37,9 +38,7 @@ void TestClass::draw(float time)
 		+ tstring(_T("\n"))).c_str());
 
 	//バッファクリア
-	device->device()->Clear(
-	0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET,
-	D3DCOLOR_XRGB(80, 5, 46), 1.0f, 0);
+	device->clear(RENDER_Z, Color((byte)80, 5, 46));
 }
 
 void TestClass::update(float time)
@@ -149,9 +148,10 @@ void TestScene::draw( float time )
 }
 
 bool TestScene::isFade() const{
-	return !((getState() == ACTIVE) 
-		|| (getState()==TRANSITION_ON && getTransitionState()<=0.5) 
-		|| (getState()==TRANSITION_OFF && getTransitionState()<=0.5));
+	return !(
+		(getState()==ACTIVE) || 
+		(getState()==TRANSITION_ON  && getTransitionState()<=0.5) || 
+		(getState()==TRANSITION_OFF && getTransitionState()<=0.5) );
 }
 
 void TestScene::fade()
@@ -225,17 +225,18 @@ void TestObject::update( Controller controller )
 		Point2f vel;
 		Bullet* b;
 		float ratio =TestClass::WindowSizeRatio();
+		const float bulletBaseVel =2.5;
 
 		for (int i=0;i<4;++i)
 		{
-			vel.set(10*cos(rot+i*(float)M_PI/4),10*sin(rot+i*(float)M_PI/4));
+			vel.set(bulletBaseVel*cos(rot+i*(float)M_PI/4),bulletBaseVel*sin(rot+i*(float)M_PI/4));
 			vel *=ratio;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, vel, vel*0.01f):0;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
 
-			vel.set(10*cos(-rot-i*(float)M_PI/4),10*sin(-rot-i*(float)M_PI/4));
+			vel.set(bulletBaseVel*cos(-rot-i*(float)M_PI/4),bulletBaseVel*sin(-rot-i*(float)M_PI/4));
 			vel *=ratio;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, vel, vel*0.01f):0;

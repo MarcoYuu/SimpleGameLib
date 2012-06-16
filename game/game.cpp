@@ -1,8 +1,10 @@
-#include "game.h"
-#include "../other/utility.h"
-#include "../other/frame_rate_counter.h"
-#include "../input/input_direct_input.h"
+
 #include <string>
+
+#include <game/game.h>
+#include <other/utility.h>
+#include <other/frame_rate_counter.h>
+#include <input/input_direct_input.h>
 
 namespace yuu{
 namespace game{
@@ -47,7 +49,7 @@ bool IGameComponent::operator<( const IGameComponent& rhs ) const
 //-----------------------------------------------------------------------------------------------
 // ゲームクラス
 //-----------------------------------------------------------------------------------------------
-Game::Game(const tstring &title, graphic::WINDOW_SIZE size, bool fullscreen, bool vsync)
+Game::Game(const tstring &title, graphic::BackBufferSize size, bool fullscreen, bool vsync)
 	: m_device()
 	, m_components()
 	, m_controller()
@@ -61,7 +63,7 @@ Game::Game(const tstring &title, graphic::WINDOW_SIZE size, bool fullscreen, boo
 	setWindow(window);
 
 	// グラフィックデバイスの作成
-	m_device =GraphicDeviceManager::create(window->getHandle(), size, !fullscreen, vsync);
+	m_device =GraphicDeviceManager::create(window, size, !fullscreen, vsync);
 	
 	// カウンタの作成
 	if(ClockFreqCounter::isAvailable())
@@ -70,7 +72,7 @@ Game::Game(const tstring &title, graphic::WINDOW_SIZE size, bool fullscreen, boo
 		m_counter.reset(new MultiMediaCounter()); 
 
 	// コントローラの作成
-	m_controller =CreateDirectInputController(window->getHandle());
+	m_controller =CreateDirectInputController(window);
 }
 
 Game::~Game()
@@ -125,15 +127,15 @@ void Game::mainProcess()
 		(*it)->update((float)diff);
 
 	//描画開始
-	m_device->device()->BeginScene();
+	m_device->begin();
 	{
 		draw((float)diff);
 		for(ComponentIterator it =m_components.begin();it != end;++it)
 			(*it)->draw((float)diff);
 	}
 	//描画終了
-	m_device->device()->EndScene();
-	m_device->device()->Present(NULL, NULL, NULL, NULL);
+	m_device->end();
+	m_device->present();
 }
 
 }

@@ -27,7 +27,7 @@ template<class Derived>
 class IRefferenceCount
 {
 private:
-	std::size_t m_ref_count;
+	size_t m_ref_count;
 
 public:
 	// コンストラクタ
@@ -37,7 +37,7 @@ public:
 
 	// 現在の参照数の取得
 	// キャストされたポインタ
-	inline std::size_t getRef() const
+	inline size_t getRef() const
 	{
 		return m_ref_count;
 	}

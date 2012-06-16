@@ -1,4 +1,5 @@
-#include "scene_manager.h"
+
+#include <game/scene_manager.h>
 
 namespace yuu{
 namespace game{
@@ -6,7 +7,8 @@ namespace game{
 //-----------------------------------------------------------------------------------------------
 // ÉQÅ[ÉÄÉVÅ[Éì
 //-----------------------------------------------------------------------------------------------
-IScene::IScene( SceneManagerComponent &manager ) : m_is_popup(false)
+IScene::IScene( SceneManagerComponent &manager ) 
+	: m_is_popup(false)
 	, m_is_exitting(false)
 	, m_have_focus(false)
 	, m_transition_on_time(0)

@@ -1,26 +1,12 @@
-// InputInterface.h
-// 入力インタフェースヘッダ
-// 簡易説明
-// 			入力インタフェースのヘッダ
-//
-// 0.1
+
 #pragma once
-
-#ifndef DIRECTINPUT_VERSION
-#define DIRECTINPUT_VERSION 0x800
-#endif
-
-#include <dinput.h>
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
+#include <other/refference_count.h>
 
-#include "../other/refference_count.h"
-
-// 自分のライブラリの名前空間
 namespace yuu
 {
-// 入力関連
 namespace input
 {
 //--------------------------------------------------------------------------------------
@@ -32,27 +18,23 @@ class IKeyBoardInput;
 class IGamePadInput;
 class IPointingDeviceInput;
 
-// _IControllerクラスへのポインタ
 typedef boost::intrusive_ptr<IController> Controller;
-// _IKeyBoardInputクラスへのポインタ
 typedef boost::intrusive_ptr<IKeyBoardInput> KeyBoard;
-// _IGamePadInputクラスへのポインタ
 typedef boost::intrusive_ptr<IGamePadInput> GamePad;
-// _IPointingDeviceInputクラスへのポインタ
 typedef boost::intrusive_ptr<IPointingDeviceInput> PointingDevice;
 
 //-----------------------------------------------------------------------------------
 //ボタン列挙子
 //-----------------------------------------------------------------------------------
 // ボタンの取得方法
-enum STATE_TYPE
+enum ButtonState
 {
 	PRESENT,	// <現在の状態を取得する
 	JUST_DOWN,	// <押された直後かを取得する
-	JUST_UP		// <離された直後かを取得する
+	JUST_UP// <離された直後かを取得する
 };
 // コントローラーのボタン
-enum CONTROL_BUTTON
+enum ControllerButton
 {
 	CB_BUTTON_0,
 	CB_BUTTON_1,
@@ -78,56 +60,56 @@ enum CONTROL_BUTTON
 	BUTTON_NONE = 0xffffffff
 };
 // キーボードのボタン
-enum KEYBOARD_BUTTON
+enum KeyboardButton
 {
-	KB_BUTTON_A         = DIK_A,
-	KB_BUTTON_B         = DIK_B,
-	KB_BUTTON_C         = DIK_C,
-	KB_BUTTON_D         = DIK_D,
-	KB_BUTTON_E         = DIK_E,
-	KB_BUTTON_F         = DIK_F,
-	KB_BUTTON_G         = DIK_G,
-	KB_BUTTON_H         = DIK_H,
-	KB_BUTTON_I         = DIK_I,
-	KB_BUTTON_J         = DIK_J,
-	KB_BUTTON_K         = DIK_K,
-	KB_BUTTON_L         = DIK_L,
-	KB_BUTTON_M         = DIK_M,
-	KB_BUTTON_N         = DIK_N,
-	KB_BUTTON_O         = DIK_O,
-	KB_BUTTON_P         = DIK_P,
-	KB_BUTTON_Q         = DIK_Q,
-	KB_BUTTON_R         = DIK_R,
-	KB_BUTTON_S         = DIK_S,
-	KB_BUTTON_T         = DIK_T,
-	KB_BUTTON_U         = DIK_U,
-	KB_BUTTON_V         = DIK_V,
-	KB_BUTTON_W         = DIK_W,
-	KB_BUTTON_X         = DIK_X,
-	KB_BUTTON_Y         = DIK_Y,
-	KB_BUTTON_Z         = DIK_Z,
-	KB_BUTTON_SHIFT		= DIK_LSHIFT,
-	KB_BUTTON_CTRL		= DIK_LCONTROL,
-	KB_BUTTON_ESCAPE	= DIK_ESCAPE,
-	KB_BUTTON_DELETE	= DIK_DELETE,
-	KB_BUTTON_LEFT		= DIK_LEFT,
-	KB_BUTTON_RIGHT		= DIK_RIGHT,
-	KB_BUTTON_UP		= DIK_UP,
-	KB_BUTTON_DOWN		= DIK_DOWN,
-	KB_BUTTON_1         = DIK_1,
-	KB_BUTTON_2         = DIK_2,
-	KB_BUTTON_3         = DIK_3,
-	KB_BUTTON_4         = DIK_4,
-	KB_BUTTON_5         = DIK_5,
-	KB_BUTTON_6         = DIK_6,
-	KB_BUTTON_7         = DIK_7,
-	KB_BUTTON_8         = DIK_8,
-	KB_BUTTON_9         = DIK_9,
-	KB_BUTTON_0         = DIK_0,
+	KB_BUTTON_A,
+	KB_BUTTON_B,
+	KB_BUTTON_C,
+	KB_BUTTON_D,
+	KB_BUTTON_E,
+	KB_BUTTON_F,
+	KB_BUTTON_G,
+	KB_BUTTON_H,
+	KB_BUTTON_I,
+	KB_BUTTON_J,
+	KB_BUTTON_K,
+	KB_BUTTON_L,
+	KB_BUTTON_M,
+	KB_BUTTON_N,
+	KB_BUTTON_O,
+	KB_BUTTON_P,
+	KB_BUTTON_Q,
+	KB_BUTTON_R,
+	KB_BUTTON_S,
+	KB_BUTTON_T,
+	KB_BUTTON_U,
+	KB_BUTTON_V,
+	KB_BUTTON_W,
+	KB_BUTTON_X,
+	KB_BUTTON_Y,
+	KB_BUTTON_Z,
+	KB_BUTTON_SHIFT,
+	KB_BUTTON_CTRL,
+	KB_BUTTON_ESCAPE,
+	KB_BUTTON_DELETE,
+	KB_BUTTON_LEFT,
+	KB_BUTTON_RIGHT,
+	KB_BUTTON_UP,
+	KB_BUTTON_DOWN,
+	KB_BUTTON_1,
+	KB_BUTTON_2,
+	KB_BUTTON_3,
+	KB_BUTTON_4,
+	KB_BUTTON_5,
+	KB_BUTTON_6,
+	KB_BUTTON_7,
+	KB_BUTTON_8,
+	KB_BUTTON_9,
+	KB_BUTTON_0,
 	KB_BUTTON_NUM
 };
 // マウスのボタン
-enum MOUSE_BUTTON
+enum MouseButton
 {
 	MB_BUTTON_0,
 	MB_BUTTON_1,
@@ -136,7 +118,7 @@ enum MOUSE_BUTTON
 	MB_BUTTON_NUM
 };
 // ゲームパッドのボタン
-enum GAMEPAD_BUTTON
+enum GamepadButton
 {
 	GB_BUTTON_0,
 	GB_BUTTON_1,
@@ -202,7 +184,7 @@ public:
 	// 取得するボタン
 	// 取得状態
 	// ボタンの状態
-	virtual bool getButtonState(CONTROL_BUTTON ctrl, STATE_TYPE get_type = PRESENT) = 0;
+	virtual bool getButtonState(ControllerButton ctrl, ButtonState get_type = PRESENT) = 0;
 	// 軸の状態を取得
 	// STATE_TYPE
 	// 水平方向　:-1.0～1.0で値を返すこと
@@ -240,19 +222,19 @@ public:
 	// 設定されるボタン
 	// 設定するキーボードのキー
 	// なし
-	virtual void setConfigKeyBoard(CONTROL_BUTTON ctrl, KEYBOARD_BUTTON key) = 0;
+	virtual void setConfigKeyBoard(ControllerButton ctrl, KeyboardButton key) = 0;
 	// ポインティングデバイスの入力をボタンに設定する
 	// STATE_TYPE
 	// 設定されるボタン
 	// 設定するマウスのボタン
 	// なし
-	virtual void setConfigMouse(CONTROL_BUTTON ctrl, MOUSE_BUTTON key) = 0;
+	virtual void setConfigMouse(ControllerButton ctrl, MouseButton key) = 0;
 	// ゲームパッドの入力をボタンに設定する
 	// STATE_TYPE
 	// 設定されるボタン
 	// 設定するゲームパッドののボタン
 	// なし
-	virtual void setConfigGamepad(CONTROL_BUTTON ctrl, GAMEPAD_BUTTON key) = 0;
+	virtual void setConfigGamepad(ControllerButton ctrl, GamepadButton key) = 0;
 };
 
 //-----------------------------------------------------------------//
@@ -277,7 +259,7 @@ public:
 	// 取得するキー
 	// 取得状態
 	// 状態
-	virtual bool getKeyState(KEYBOARD_BUTTON key, STATE_TYPE get_type = PRESENT) = 0;
+	virtual bool getKeyState(KeyboardButton key, ButtonState get_type = PRESENT) = 0;
 };
 
 //-----------------------------------------------------------------//
@@ -301,7 +283,7 @@ public:
 	// 取得するボタン
 	// 取得状態
 	// 状態
-	virtual bool getButtonState(GAMEPAD_BUTTON button, STATE_TYPE get_type = PRESENT) = 0;
+	virtual bool getButtonState(GamepadButton button, ButtonState get_type = PRESENT) = 0;
 	// 軸の状態を取得
 	// STATE_TYPE
 	// 水平方向　:-1.0～1.0で値を返すこと
@@ -339,7 +321,7 @@ public:
 	// 取得するボタン
 	// 取得状態
 	// 状態
-	virtual bool getButtonState(MOUSE_BUTTON button, STATE_TYPE get_type = PRESENT) = 0;
+	virtual bool getButtonState(MouseButton button, ButtonState get_type = PRESENT) = 0;
 	// 変化量を取得
 	// 平行方向
 	// 垂直方向

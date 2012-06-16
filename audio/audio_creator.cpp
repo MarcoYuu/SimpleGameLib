@@ -15,12 +15,11 @@
 #include <stdexcept>
 
 #include <process.h>
-
 #include <xaudio2.h>
 
-#include "audio_creator.h"
-#include "pcm_reader.h"
-#include "mta_coinitiarizer.h"
+#include <audio/audio_creator.h>
+#include <audio/pcm_reader.h>
+#include <audio/mta_coinitiarizer.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -132,7 +131,7 @@ protected:
 	// 生成、代入とコピー禁止
 	// コンストラクタ
 	// ソースボイスの個数
-	IXAudio2Base(std::size_t voice_num = 1)
+	IXAudio2Base(size_t voice_num = 1)
 		: m_pcm()
 		, m_src_voice_list(voice_num, 0)
 	{}
@@ -154,7 +153,7 @@ class NormalAudio : public IXAudio2Base
 	typedef IXAudio2Base base;
 
 	// 生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AUDIOTYPE, std::size_t);
+	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	std::vector<char> m_buff;	// <バッファ
@@ -188,7 +187,7 @@ class SyncAudio : public IXAudio2Base
 	typedef IXAudio2Base Super;
 
 	//生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AUDIOTYPE, std::size_t);
+	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	//バッファ
@@ -227,7 +226,7 @@ class StreamingAudio : public IXAudio2Base
 	typedef IXAudio2Base Super;
 
 	//生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AUDIOTYPE, std::size_t);
+	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	//ストリーミングスレッド関数とハンドル
@@ -245,7 +244,7 @@ private:
 private:
 	//バッファ
 	int m_UseBufNum;
-	static const std::size_t BUFFER_NUM = 4;
+	static const size_t BUFFER_NUM = 4;
 	std::vector<char> m_buff[BUFFER_NUM];
 
 	//ループフラグ
@@ -335,23 +334,26 @@ NormalAudio::NormalAudio(const tstring &filename)
 	m_pcm.open(filename);
 #endif
 
+	IPCMReader::Format format;
+	m_pcm.getWaveFormat(&format);
+
 	//ソースボイスの作成
 	if(FAILED(XAudioEngine::getInstance().getDevice()->CreateSourceVoice(
-				  &m_src_voice_list[0], m_pcm.getWaveFormat())))
+				  &m_src_voice_list[0], (WAVEFORMATEX*)&format)))
 		throw std::runtime_error("ソースボイスの作成に失敗しました");
 
 	//データの読み取り
-	std::size_t read;
+	
 	m_buff.resize(m_pcm.getDataSize());
-	m_pcm.read(&m_buff[0], m_pcm.getDataSize(), &read);
+	size_t read =m_pcm.read(&m_buff[0], m_pcm.getDataSize());
 
 	//XAudio用のバッファ
 	std::memset(&m_xaudio_buff, 0, sizeof(m_xaudio_buff));
 
 	m_xaudio_buff.AudioBytes = read;
 	m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&m_buff[0]);
-	m_xaudio_buff.Flags		= XAUDIO2_END_OF_STREAM;
-	m_xaudio_buff.LoopCount	= 0;
+	m_xaudio_buff.Flags		 = XAUDIO2_END_OF_STREAM;
+	m_xaudio_buff.LoopCount	 = 0;
 
 	m_src_voice_list[0]->SubmitSourceBuffer(&m_xaudio_buff);
 }
@@ -413,10 +415,12 @@ SyncAudio::SyncAudio(const tstring &filename, int syncnum)
 	int i = 0;
 	try
 	{
+		IPCMReader::Format format;
+		m_pcm.getWaveFormat(&format);
 		for(i = 0; i < syncnum; ++i)
 		{
 			if(FAILED(XAudioEngine::getInstance().getDevice()->CreateSourceVoice(
-						  &m_src_voice_list[i], m_pcm.getWaveFormat())))
+						  &m_src_voice_list[i], (WAVEFORMATEX*)&format)))
 				throw std::runtime_error("ソースボイスの作成に失敗しました");
 		}
 	}
@@ -429,9 +433,8 @@ SyncAudio::SyncAudio(const tstring &filename, int syncnum)
 	}
 
 	//データの読み取り
-	std::size_t read = 0;
 	m_buff.resize(m_pcm.getDataSize());
-	m_pcm.read(&m_buff[0], m_pcm.getDataSize(), &read);
+	size_t read =m_pcm.read(&m_buff[0], m_pcm.getDataSize());
 
 	//XAudio用のバッファ
 	std::memset(&m_xaudio_buff, 0, sizeof(m_xaudio_buff));
@@ -553,16 +556,17 @@ StreamingAudio::StreamingAudio(const tstring &filename)
 #endif
 
 		//ソースボイスの作成
-		const WAVEFORMATEX *wfx = m_pcm.getWaveFormat();
+		IPCMReader::Format format;
+		m_pcm.getWaveFormat(&format);
 		if(FAILED(XAudioEngine::getInstance().getDevice()->CreateSourceVoice(
-					  &m_src_voice_list[0], wfx, 0, 8.0f, m_pCallBack.get())))
+					  &m_src_voice_list[0], (WAVEFORMATEX*)&format, 0, 8.0f, m_pCallBack.get())))
 			throw std::runtime_error("ソースボイスの作成に失敗しました");
 
 		//データ情報の読み取り
-		std::size_t bufsize =
-			wfx->nChannels *
-			wfx->nSamplesPerSec *
-			wfx->wBitsPerSample /
+		size_t bufsize =
+			format.nChannels *
+			format.nSamplesPerSec *
+			format.wBitsPerSample /
 			8;
 		//一秒間のバッファサイズ*4
 		for(int i = 0; i < BUFFER_NUM; ++i)
@@ -570,8 +574,7 @@ StreamingAudio::StreamingAudio(const tstring &filename)
 		std::memset(&m_xaudio_buff, 0, sizeof(m_xaudio_buff));
 
 		//とりあえず一つ入れておく
-		std::size_t read = 0;
-		m_pcm.read(&m_buff[m_UseBufNum].at(0), m_buff[m_UseBufNum].size(), &read);
+		size_t read =m_pcm.read(&m_buff[m_UseBufNum].at(0), m_buff[m_UseBufNum].size());
 		//XAudio用のバッファ
 		m_xaudio_buff.AudioBytes = read;
 		m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&m_buff[m_UseBufNum].at(0));
@@ -643,11 +646,9 @@ unsigned int __stdcall StreamingAudio::StreamingThread(void *thisptr)
 				break;
 
 			//データの読み取り
-			std::size_t read = 0;
-			_this->m_pcm.read(
-				&_this->m_buff[_this->m_UseBufNum].at(0),
-				_this->m_buff[_this->m_UseBufNum].size(),
-				&read);
+			size_t read=_this->m_pcm.read(
+				_this->m_buff[_this->m_UseBufNum].data(),
+				_this->m_buff[_this->m_UseBufNum].size());
 
 			//読み取りを最後まで行ったときは頭出し
 			if(_this->m_buff[_this->m_UseBufNum].size() > read
@@ -825,7 +826,7 @@ void InitAudio()
 	XAudioEngine::getInstance().init();
 }
 
-IAudio CreateAudio(const tstring &filename, AUDIOTYPE type, std::size_t value)
+IAudio CreateAudio(const tstring &filename, AudioType type, size_t value)
 {
 	//初期化がすでに行われている
 	assert(XAudioEngine::getInstance().isInitialized());

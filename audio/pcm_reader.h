@@ -6,11 +6,7 @@
 // 0.3
 #pragma once
 
-
-#include <xaudio2.h>
 #include <string>
-
-#include "../other/refference_count.h"
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -18,19 +14,20 @@ namespace yuu
 //--------------------------------------------------------------------------------------
 //PCM解析機インタフェース
 //--------------------------------------------------------------------------------------
-// PCM解析インタフェース
-//
-// PCM音源を解析するインタフェース
-//
 class IPCMReader
 {
-protected:
-	WAVEFORMATEX m_wfx;			// <WAVEフォーマット
-	std::size_t m_data_size;		// <データサイズ
+public:
+	struct Format{
+		unsigned short	wFormatTag;
+		unsigned int	nChannels;
+		unsigned int	nSamplesPerSec;
+		unsigned short	nAvgBytesPerSec;
+		unsigned int	nBlockAlign;
+		unsigned int	wBitsPerSample;
+		unsigned int	cbSize;
+	};
 
 public:
-	// コンストラクタ
-	IPCMReader();
 	// デストラクタ
 	virtual ~IPCMReader() {}
 
@@ -42,25 +39,24 @@ public:
 	// 読み取りバッファ
 	// 読み取り量
 	// 実際に読み取った量
-	// なし
-	virtual void read(void *buff, std::size_t size, std::size_t *readed) = 0;
+	virtual size_t read(void *buff, size_t size) = 0;
 	// データ部分の初めに移動
 	// なし
 	virtual void seekToTop() = 0;
 	// 指定分だけ進めるシーク
 	// シークサイズ
 	// なし
-	virtual void seek(std::size_t size) = 0;
+	virtual void seek(size_t size) = 0;
 	// EOF検出
 	// なし
 	virtual bool isEOF() const = 0;
 	// データサイズ取得
 	// なし
-	std::size_t getDataSize() const;
+	virtual size_t getDataSize() const =0;
 	// フォーマット取得
 	// WAVEFORMATEXへのポインタ
 	// なし
-	const WAVEFORMATEX *getWaveFormat(WAVEFORMATEX *wfx = NULL) const;
+	virtual void getWaveFormat(Format *format) const=0;
 };
 
 //--------------------------------------------------------------------------------------
@@ -75,9 +71,12 @@ class WaveFileReader: public IPCMReader
 private:
 	typedef IPCMReader base;
 
-	std::size_t m_offset_to_data;	// <データ部分までのオフセット値
-	std::size_t m_readed;		// <読みだしたデータサイズ
-	std::string m_filename;		// <開いているファイル名
+	size_t m_offset_to_data;// データ部分までのオフセット値
+	size_t m_readed;		// 読みだしたデータサイズ
+	std::string m_filename;	// 開いているファイル名
+
+	Format m_format;		// WAVEフォーマット
+	size_t m_data_size;		// データサイズ
 
 	//Wave解析
 	void Analyze();
@@ -85,12 +84,13 @@ private:
 public:
 	WaveFileReader();
 	WaveFileReader(const std::string &filename);
-	~WaveFileReader();
 
 	void open(const std::string &filename);
-	void read(void *buff, std::size_t size, std::size_t *readed);
+	size_t read(void *buff, size_t size);
 	void seekToTop();
-	void seek(std::size_t size);
+	void seek(size_t size);
 	bool isEOF() const;
+	size_t getDataSize() const;
+	void getWaveFormat(Format *format) const;
 };
 }

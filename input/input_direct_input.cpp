@@ -5,16 +5,22 @@
 //
 // 0.1
 //
-#pragma warning(disable:4290)
+
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dinput8.lib")
+
+#ifndef DIRECTINPUT_VERSION
+#define DIRECTINPUT_VERSION 0x800
+#endif
+
+#include <dinput.h>
 
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
 
-#include "input_direct_input.h"
-#include "../other/utility.h"
+#include <input/input_direct_input.h>
+#include <other/utility.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -22,11 +28,15 @@ namespace yuu
 // 入力関連
 namespace input
 {
+	class DirectInputDevice;
+	class DirectInputController;
+	class DirectInputKeyBoard;
+	class DirectInputMouse;
+	class DirectInputGamePad;
+
 //--------------------------------------------------------------------------------------
-//DirectInputの基本デバイスクラス
+//DirectInputのデバイスクラス
 //--------------------------------------------------------------------------------------
-// DirectInput本体を保持するクラス
-//
 class DirectInputDevice
 	: boost::noncopyable
 {
@@ -85,9 +95,9 @@ public:
 };
 
 //-----------------------------------------------------------------//
-//デフォルトコントローラー
+// コントローラー by DirectInput
 //-----------------------------------------------------------------//
-class DefaultController : public IController
+class DirectInputController : public IController
 {
 	typedef IController base;
 private:
@@ -97,20 +107,20 @@ private:
 
 	struct ButtonSet
 	{
-		KEYBOARD_BUTTON key;
-		GAMEPAD_BUTTON pad;
-		MOUSE_BUTTON mouse;
+		KeyboardButton key;
+		GamepadButton pad;
+		MouseButton mouse;
 	};
 	ButtonSet m_Setting[CB_BUTTON_NUM];
 
-	DefaultController(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse);
+	DirectInputController(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse);
 
 public:
 	static Controller create(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse);
-	~DefaultController() {}
+	~DirectInputController() {}
 
 	void update();
-	bool getButtonState(CONTROL_BUTTON ctrl, STATE_TYPE get_type = PRESENT);
+	bool getButtonState(ControllerButton ctrl, ButtonState get_type = PRESENT);
 	void getAnalogAxisState(double &x, double &y, double &z);
 	void getAnalogRotateState(double &rx, double &ry, double &rz);
 	void getRelativePos(double &x, double &y);
@@ -118,23 +128,23 @@ public:
 	void getWheelMove(double &z);
 
 	void setDefault();
-	void setConfigKeyBoard(CONTROL_BUTTON ctrl, KEYBOARD_BUTTON key);
-	void setConfigMouse(CONTROL_BUTTON ctrl, MOUSE_BUTTON key);
-	void setConfigGamepad(CONTROL_BUTTON ctrl, GAMEPAD_BUTTON key);
+	void setConfigKeyBoard(ControllerButton ctrl, KeyboardButton key);
+	void setConfigMouse(ControllerButton ctrl, MouseButton key);
+	void setConfigGamepad(ControllerButton ctrl, GamepadButton key);
 };
 
-DefaultController::DefaultController(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse)
+DirectInputController::DirectInputController(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse)
 	: m_keyboard(keyboard)
 	, m_gamepad(gamepad)
 	, m_mouse(mouse)
 {
 	setDefault();
 }
-Controller DefaultController::create(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse)
+Controller DirectInputController::create(KeyBoard keyboard, GamePad gamepad, PointingDevice mouse)
 {
-	return Controller(new DefaultController(keyboard, gamepad, mouse));
+	return Controller(new DirectInputController(keyboard, gamepad, mouse));
 }
-void DefaultController::setDefault()
+void DirectInputController::setDefault()
 {
 	m_Setting[CB_BUTTON_0].key		= KB_BUTTON_Z;
 	m_Setting[CB_BUTTON_0].mouse	= MB_BUTTON_0;
@@ -153,46 +163,46 @@ void DefaultController::setDefault()
 	m_Setting[CB_BUTTON_3].pad		= GB_BUTTON_3;
 
 	m_Setting[CB_BUTTON_4].key		= KB_BUTTON_S;
-	m_Setting[CB_BUTTON_4].mouse	= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_4].mouse	= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_4].pad		= GB_BUTTON_4;
 
 	m_Setting[CB_BUTTON_5].key		= KB_BUTTON_D;
-	m_Setting[CB_BUTTON_5].mouse	= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_5].mouse	= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_5].pad		= GB_BUTTON_5;
 
 	m_Setting[CB_BUTTON_6].key		= KB_BUTTON_SHIFT;
-	m_Setting[CB_BUTTON_6].mouse	= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_6].mouse	= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_6].pad		= GB_BUTTON_6;
 
 	m_Setting[CB_BUTTON_7].key		= KB_BUTTON_CTRL;
-	m_Setting[CB_BUTTON_7].mouse	= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_7].mouse	= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_7].pad		= GB_BUTTON_7;
 
 	ButtonSet none;
-	none.key   = (KEYBOARD_BUTTON)BUTTON_NONE;
-	none.pad   = (GAMEPAD_BUTTON)BUTTON_NONE;
-	none.mouse = (MOUSE_BUTTON)BUTTON_NONE;
+	none.key   = (KeyboardButton)BUTTON_NONE;
+	none.pad   = (GamepadButton)BUTTON_NONE;
+	none.mouse = (MouseButton)BUTTON_NONE;
 
 	for(int i = CB_BUTTON_8; i < CB_BUTTON_LEFT; ++i)
 		m_Setting[i] = none;
 
 	m_Setting[CB_BUTTON_LEFT].key		= KB_BUTTON_LEFT;
-	m_Setting[CB_BUTTON_LEFT].mouse		= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_LEFT].mouse		= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_LEFT].pad		= GB_BUTTON_LEFT;
 
 	m_Setting[CB_BUTTON_RIGHT].key		= KB_BUTTON_RIGHT;
-	m_Setting[CB_BUTTON_RIGHT].mouse	= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_RIGHT].mouse	= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_RIGHT].pad		= GB_BUTTON_RIGHT;
 
 	m_Setting[CB_BUTTON_UP].key			= KB_BUTTON_UP;
-	m_Setting[CB_BUTTON_UP].mouse		= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_UP].mouse		= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_UP].pad			= GB_BUTTON_RIGHT;
 
 	m_Setting[CB_BUTTON_DOWN].key		= KB_BUTTON_DOWN;
-	m_Setting[CB_BUTTON_DOWN].mouse		= (MOUSE_BUTTON)BUTTON_NONE;
+	m_Setting[CB_BUTTON_DOWN].mouse		= (MouseButton)BUTTON_NONE;
 	m_Setting[CB_BUTTON_DOWN].pad		= GB_BUTTON_DOWN;
 }
-void DefaultController::update()
+void DirectInputController::update()
 {
 	if(m_keyboard != NULL)
 		m_keyboard->update();
@@ -201,29 +211,29 @@ void DefaultController::update()
 	if(m_mouse != NULL)
 		m_mouse->update();
 }
-bool DefaultController::getButtonState(CONTROL_BUTTON ctrl, STATE_TYPE get_type)
+bool DirectInputController::getButtonState(ControllerButton ctrl, ButtonState get_type)
 {
 	bool key(false), pad(false), mouse(false);
 
 	if(m_keyboard != NULL)
 	{
-		if(m_Setting[ctrl].key != (KEYBOARD_BUTTON)BUTTON_NONE)
+		if(m_Setting[ctrl].key != (KeyboardButton)BUTTON_NONE)
 			key = m_keyboard->getKeyState(m_Setting[ctrl].key, get_type);
 	}
 	if(m_gamepad != NULL)
 	{
-		if(m_Setting[ctrl].pad != (GAMEPAD_BUTTON)BUTTON_NONE)
+		if(m_Setting[ctrl].pad != (GamepadButton)BUTTON_NONE)
 			pad = m_gamepad->getButtonState(m_Setting[ctrl].pad, get_type);
 	}
 	if(m_mouse != NULL)
 	{
-		if(m_Setting[ctrl].mouse != (MOUSE_BUTTON)BUTTON_NONE)
+		if(m_Setting[ctrl].mouse != (MouseButton)BUTTON_NONE)
 			mouse = m_mouse->getButtonState(m_Setting[ctrl].mouse, get_type);
 	}
 
 	return (key || pad || mouse);
 }
-void DefaultController::getAnalogAxisState(double &x, double &y, double &z)
+void DirectInputController::getAnalogAxisState(double &x, double &y, double &z)
 {
 	if(m_gamepad != NULL)
 	{
@@ -236,7 +246,7 @@ void DefaultController::getAnalogAxisState(double &x, double &y, double &z)
 		z = 0;
 	}
 }
-void DefaultController::getAnalogRotateState(double &rx, double &ry, double &rz)
+void DirectInputController::getAnalogRotateState(double &rx, double &ry, double &rz)
 {
 	if(m_gamepad != NULL)
 	{
@@ -249,7 +259,7 @@ void DefaultController::getAnalogRotateState(double &rx, double &ry, double &rz)
 		rz = 0;
 	}
 }
-void DefaultController::getRelativePos(double &x, double &y)
+void DirectInputController::getRelativePos(double &x, double &y)
 {
 	if(m_mouse != NULL)
 	{
@@ -261,7 +271,7 @@ void DefaultController::getRelativePos(double &x, double &y)
 		y = 0;
 	}
 }
-void DefaultController::getAbsScreenPos(double &x, double &y)
+void DirectInputController::getAbsScreenPos(double &x, double &y)
 {
 	if(m_mouse != NULL)
 	{
@@ -273,7 +283,7 @@ void DefaultController::getAbsScreenPos(double &x, double &y)
 		y = 0;
 	}
 }
-void DefaultController::getWheelMove(double &z)
+void DirectInputController::getWheelMove(double &z)
 {
 	if(m_mouse != NULL)
 	{
@@ -284,44 +294,45 @@ void DefaultController::getWheelMove(double &z)
 		z = 0;
 	}
 }
-
-void DefaultController::setConfigKeyBoard(CONTROL_BUTTON ctrl, KEYBOARD_BUTTON key)
+void DirectInputController::setConfigKeyBoard(ControllerButton ctrl, KeyboardButton key)
 {
 	m_Setting[ctrl].key = key;
 }
-void DefaultController::setConfigMouse(CONTROL_BUTTON ctrl, MOUSE_BUTTON key)
+void DirectInputController::setConfigMouse(ControllerButton ctrl, MouseButton key)
 {
 	m_Setting[ctrl].mouse = key;
 }
-void DefaultController::setConfigGamepad(CONTROL_BUTTON ctrl, GAMEPAD_BUTTON key)
+void DirectInputController::setConfigGamepad(ControllerButton ctrl, GamepadButton key)
 {
 	m_Setting[ctrl].pad = key;
 }
 
 //--------------------------------------------------------------------------------------
-//DirectInputの初期化
+// キーボード入力 by DirectInput
 //--------------------------------------------------------------------------------------
-void InitInput()
+class DirectInputKeyBoard : public IKeyBoardInput
 {
-	DirectInputDevice::instance().init();
-}
+	IDirectInputDevice8 *m_pKeyBoardDev;
 
-Controller CreateDirectInputController(HWND hWnd)
-{
-	InitInput();
+	BYTE m_KeyState[256];
+	BYTE m_PrevKeyState[256];
 
-	return Controller(
-			   DefaultController::create(
-				   DirectInputKeyBoard::Create(hWnd),
-				   DirectInputGamePad::Create(hWnd),
-				   DirectInputMouse::Create(hWnd)
-			   )
-		   );
-}
+public:
+	//コンストラクタ･デストラクタ
+	DirectInputKeyBoard(HWND hWnd);
+	~DirectInputKeyBoard(void);
 
-//--------------------------------------------------------------------------------------
-//キーボード入力 by DirectInput
-//--------------------------------------------------------------------------------------
+	// 参照カウンタ付ポインタを作成
+	// 入力を受け付けるウィンドウのハンドル
+	// 作成できなかった場合NULL
+	static KeyBoard Create(HWND hWnd);
+
+	void update();
+	bool getKeyState(KeyboardButton key, ButtonState get_type);
+
+	static int convert(KeyboardButton);
+};
+
 DirectInputKeyBoard::DirectInputKeyBoard(HWND hWnd)
 	: m_pKeyBoardDev(NULL)
 {
@@ -350,7 +361,6 @@ DirectInputKeyBoard::~DirectInputKeyBoard(void)
 
 	SafeRelease(m_pKeyBoardDev);
 }
-
 KeyBoard DirectInputKeyBoard::Create(HWND hWnd)
 {
 	KeyBoard key;
@@ -370,28 +380,105 @@ void DirectInputKeyBoard::update()
 	m_pKeyBoardDev->Acquire();
 	m_pKeyBoardDev->GetDeviceState(256, m_KeyState);
 }
-
-bool DirectInputKeyBoard::getKeyState(KEYBOARD_BUTTON key, STATE_TYPE get_type)
+bool DirectInputKeyBoard::getKeyState(KeyboardButton key, ButtonState get_type)
 {
+	key =(KeyboardButton)convert(key);
 	switch(get_type)
 	{
 	case PRESENT:
 		return (m_KeyState[key] & 0x80) ?
-			   true : false;
+			true : false;
 	case JUST_DOWN:
 		return (m_PrevKeyState[key] & 0x80) ?
-			   false : ((m_KeyState[key] & 0x80) ? true : false);
+			false : ((m_KeyState[key] & 0x80) ? true : false);
 	case JUST_UP:
 		return (m_PrevKeyState[key] & 0x80) ?
-			   ((m_KeyState[key] & 0x80) ? false : true) : false;
+			((m_KeyState[key] & 0x80) ? false : true) : false;
 	default:
 		return false;
 	}
 }
+int DirectInputKeyBoard::convert(KeyboardButton button){
+	switch(button){
+	case KB_BUTTON_A:       return DIK_A;
+	case KB_BUTTON_B:       return DIK_B;
+	case KB_BUTTON_C:       return DIK_C;
+	case KB_BUTTON_D:       return DIK_D;
+	case KB_BUTTON_E:       return DIK_E;
+	case KB_BUTTON_F:       return DIK_F;
+	case KB_BUTTON_G:       return DIK_G;
+	case KB_BUTTON_H:       return DIK_H;
+	case KB_BUTTON_I:       return DIK_I;
+	case KB_BUTTON_J:       return DIK_J;
+	case KB_BUTTON_K:       return DIK_K;
+	case KB_BUTTON_L:       return DIK_L;
+	case KB_BUTTON_M:       return DIK_M;
+	case KB_BUTTON_N:       return DIK_N;
+	case KB_BUTTON_O:       return DIK_O;
+	case KB_BUTTON_P:       return DIK_P;
+	case KB_BUTTON_Q:       return DIK_Q;
+	case KB_BUTTON_R:       return DIK_R;
+	case KB_BUTTON_S:       return DIK_S;
+	case KB_BUTTON_T:       return DIK_T;
+	case KB_BUTTON_U:       return DIK_U;
+	case KB_BUTTON_V:       return DIK_V;
+	case KB_BUTTON_W:       return DIK_W;
+	case KB_BUTTON_X:       return DIK_X;
+	case KB_BUTTON_Y:       return DIK_Y;
+	case KB_BUTTON_Z:       return DIK_Z;
+	case KB_BUTTON_SHIFT:   return DIK_LSHIFT;
+	case KB_BUTTON_CTRL:    return DIK_LCONTROL;
+	case KB_BUTTON_ESCAPE:	return DIK_ESCAPE;
+	case KB_BUTTON_DELETE:	return DIK_DELETE;
+	case KB_BUTTON_LEFT:    return DIK_LEFT;
+	case KB_BUTTON_RIGHT:   return DIK_RIGHT;
+	case KB_BUTTON_UP:      return DIK_UP;
+	case KB_BUTTON_DOWN:    return DIK_DOWN;
+	case KB_BUTTON_1:       return DIK_1;
+	case KB_BUTTON_2:       return DIK_2;
+	case KB_BUTTON_3:       return DIK_3;
+	case KB_BUTTON_4:       return DIK_4;
+	case KB_BUTTON_5:       return DIK_5;
+	case KB_BUTTON_6:       return DIK_6;
+	case KB_BUTTON_7:       return DIK_7;
+	case KB_BUTTON_8:       return DIK_8;
+	case KB_BUTTON_9:       return DIK_9;
+	case KB_BUTTON_0:       return DIK_0;
+	}
+	return -1;
+}
 
 //--------------------------------------------------------------------------------------
-//ゲームパッド入力 by DirectInput
+// ゲームパッド入力 by DirectInput
 //--------------------------------------------------------------------------------------
+class DirectInputGamePad : public IGamePadInput
+{
+	IDirectInputDevice8 *m_pGamePad;
+
+	DIJOYSTATE m_GamePadState;
+	DIJOYSTATE m_PrevGamePadState;
+
+	//パッド列挙関数
+	static BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE *lpddi, LPVOID lpContext);
+	//軸の設定
+	static BOOL CALLBACK EnumAxesCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID lpvRef);
+
+public:
+	//コンストラクタ･デストラクタ
+	DirectInputGamePad(HWND hWnd);
+	~DirectInputGamePad();
+
+	// 参照カウンタ付ポインタを作成
+	// 入力を受け付けるウィンドウのハンドル
+	// 作成できなかった場合NULL
+	static GamePad Create(HWND hWnd);
+
+	void update();
+	bool getButtonState(GamepadButton button, ButtonState get_type = PRESENT);
+	bool getAnalogAxisState(double &x, double &y, double &z);
+	bool getAnalogRotateState(double &rx, double &ry, double &rz);
+};
+
 DirectInputGamePad::DirectInputGamePad(HWND hWnd)
 	: m_pGamePad(NULL)
 {
@@ -421,7 +508,6 @@ DirectInputGamePad::DirectInputGamePad(HWND hWnd)
 
 	update();
 }
-
 DirectInputGamePad::~DirectInputGamePad()
 {
 	if(m_pGamePad)
@@ -429,7 +515,6 @@ DirectInputGamePad::~DirectInputGamePad()
 
 	SafeRelease(m_pGamePad);
 }
-
 GamePad DirectInputGamePad::Create(HWND hWnd)
 {
 	GamePad pad;
@@ -452,8 +537,7 @@ void DirectInputGamePad::update()
 	m_pGamePad->Poll();
 	m_pGamePad->GetDeviceState(sizeof(DIJOYSTATE), &m_GamePadState);
 }
-
-bool DirectInputGamePad::getButtonState(GAMEPAD_BUTTON button, STATE_TYPE get_type)
+bool DirectInputGamePad::getButtonState(GamepadButton button, ButtonState get_type)
 {
 	switch(get_type)
 	{
@@ -480,52 +564,51 @@ bool DirectInputGamePad::getButtonState(GAMEPAD_BUTTON button, STATE_TYPE get_ty
 		{
 		case GB_BUTTON_LEFT:
 			return (m_PrevGamePadState.lX < -1000 / 2) ?
-				   false : ((m_GamePadState.lX < -1000 / 2) ? true : false);
+				false : ((m_GamePadState.lX < -1000 / 2) ? true : false);
 		case GB_BUTTON_RIGHT:
 			return (m_PrevGamePadState.lX > 1000 / 2) ?
-				   false : ((m_GamePadState.lX > 1000 / 2) ? true : false);
+				false : ((m_GamePadState.lX > 1000 / 2) ? true : false);
 		case GB_BUTTON_UP:
 			return (m_PrevGamePadState.lY > 1000 / 2) ?
-				   false : ((m_GamePadState.lY > 1000 / 2) ? true : false);
+				false : ((m_GamePadState.lY > 1000 / 2) ? true : false);
 		case GB_BUTTON_DOWN:
 			return (m_PrevGamePadState.lY < -1000 / 2) ?
-				   false : ((m_GamePadState.lY < -1000 / 2) ? true : false);
+				false : ((m_GamePadState.lY < -1000 / 2) ? true : false);
 		case GB_ANALOG_X:
 		case GB_ANALOG_Y:
 		case GB_ANALOG_Z:
 			return false;
 		default:
 			return (m_PrevGamePadState.rgbButtons[button] & 0x80) ?
-				   false : ((m_GamePadState.rgbButtons[button] & 0x80) ? true : false);
+				false : ((m_GamePadState.rgbButtons[button] & 0x80) ? true : false);
 		}
 	case JUST_UP:
 		switch(button)
 		{
 		case GB_BUTTON_LEFT:
 			return (m_PrevGamePadState.lX < -1000 / 2) ?
-				   ((m_GamePadState.lX < -1000 / 20) ? false : true) : false;
+				((m_GamePadState.lX < -1000 / 20) ? false : true) : false;
 		case GB_BUTTON_RIGHT:
 			return (m_PrevGamePadState.lX > 1000 / 2) ?
-				   ((m_GamePadState.lX > 1000 / 2) ? false : true) : false;
+				((m_GamePadState.lX > 1000 / 2) ? false : true) : false;
 		case GB_BUTTON_UP:
 			return (m_PrevGamePadState.lY > 1000 / 2) ?
-				   ((m_GamePadState.lY > 1000 / 2) ? false : true) : false;
+				((m_GamePadState.lY > 1000 / 2) ? false : true) : false;
 		case GB_BUTTON_DOWN:
 			return (m_PrevGamePadState.lY < -1000 / 2) ?
-				   ((m_GamePadState.lY < -1000 / 2) ? false : true) : false;
+				((m_GamePadState.lY < -1000 / 2) ? false : true) : false;
 		case GB_ANALOG_X:
 		case GB_ANALOG_Y:
 		case GB_ANALOG_Z:
 			return false;
 		default:
 			return (m_PrevGamePadState.rgbButtons[button] & 0x80) ?
-				   ((m_GamePadState.rgbButtons[button] & 0x80) ? false : true) : false;
+				((m_GamePadState.rgbButtons[button] & 0x80) ? false : true) : false;
 		}
 	default:
 		return false;
 	}
 }
-
 bool DirectInputGamePad::getAnalogAxisState(double &x, double &y, double &z)
 {
 	x = m_GamePadState.lX / 1000.0;
@@ -550,7 +633,7 @@ BOOL CALLBACK DirectInputGamePad::EnumJoysticksCallback(
 
 	//列挙されたジョイスティックへのインターフェイスを取得する
 	hr = dinput.getIDirentInput()->CreateDevice(
-			 lpddi->guidInstance, &This.m_pGamePad, NULL);
+		lpddi->guidInstance, &This.m_pGamePad, NULL);
 
 	if(FAILED(hr))
 		return DIENUM_CONTINUE;
@@ -570,7 +653,6 @@ BOOL CALLBACK DirectInputGamePad::EnumJoysticksCallback(
 	//このデバイスを使用
 	return DIENUM_STOP;
 }
-
 BOOL CALLBACK DirectInputGamePad::EnumAxesCallback(
 	LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID lpvRef)
 {
@@ -593,12 +675,37 @@ BOOL CALLBACK DirectInputGamePad::EnumAxesCallback(
 
 	return DIENUM_CONTINUE;
 }
+//--------------------------------------------------------------------------------------
+// マウス入力 by DirectInput
+//--------------------------------------------------------------------------------------
+class DirectInputMouse : public IPointingDeviceInput
+{
+	IDirectInputDevice8 *m_pMouse;
 
-//-----------------------------------------------------------------//
-//マウス入力 by DirectInput
-//-----------------------------------------------------------------//
+	DIMOUSESTATE m_MouseState;
+	DIMOUSESTATE m_PrevMouseState;
+
+	HWND m_hWnd;
+
+public:
+	DirectInputMouse(HWND hWnd);
+	~DirectInputMouse();
+
+	// 参照カウンタ付ポインタを作成
+	// 入力を受け付けるウィンドウのハンドル
+	// 作成できなかった場合NULL
+	static PointingDevice Create(HWND hWnd);
+
+	void update();
+	bool getButtonState(MouseButton button, ButtonState get_type = PRESENT);
+	bool getRelativePos(double &x, double &y);
+	bool getAbsScreenPos(double &x, double &y);
+	bool getWheelMove(double &z);
+};
+
 DirectInputMouse::DirectInputMouse(HWND hWnd)
-	: m_pMouse(NULL), m_hWnd(hWnd)
+	: m_pMouse(NULL)
+	, m_hWnd(hWnd)
 {
 	DirectInputDevice &m_DInput = DirectInputDevice::instance();
 
@@ -642,7 +749,7 @@ void DirectInputMouse::update()
 	m_pMouse->Acquire();
 	m_pMouse->GetDeviceState(sizeof(DIMOUSESTATE), &m_MouseState);
 }
-bool DirectInputMouse::getButtonState(MOUSE_BUTTON button, STATE_TYPE get_type)
+bool DirectInputMouse::getButtonState(MouseButton button, ButtonState get_type)
 {
 	switch(get_type)
 	{
@@ -659,7 +766,6 @@ bool DirectInputMouse::getButtonState(MOUSE_BUTTON button, STATE_TYPE get_type)
 		return false;
 	}
 }
-
 bool DirectInputMouse::getRelativePos(double &x, double &y)
 {
 	x = m_MouseState.lX;
@@ -682,5 +788,25 @@ bool DirectInputMouse::getWheelMove(double &z)
 	z = m_MouseState.lZ;
 	return true;
 }
+
+//--------------------------------------------------------------------------------------
+//DirectInputの初期化
+//--------------------------------------------------------------------------------------
+Controller CreateDirectInputController(app::Window window)
+{
+	try{
+		DirectInputDevice::instance().init();
+		Controller result = Controller(
+			DirectInputController::create(
+			DirectInputKeyBoard::Create(window->getHandle()),
+			DirectInputGamePad::Create(window->getHandle()),
+			DirectInputMouse::Create(window->getHandle()))
+			);
+		return result;
+	}catch(...){
+		return NULL;
+	}
+}
+
 }
 }

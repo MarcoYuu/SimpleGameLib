@@ -4,14 +4,17 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "audio/audio_creator.h"
-#include "input/input_direct_input.h"
-#include "graphic/graphics.h"
-#include "other/frame_rate_counter.h"
-#include "other/memory_manage_list.h"
-#include "game/game.h"
-#include "game/scene_manager.h"
+#include <audio/audio_creator.h>
+#include <input/input_direct_input.h>
 
+#include <graphic/graphics_device.h>
+#include <graphic/sprite_batch.h>
+
+#include <other/frame_rate_counter.h>
+#include <other/memory_manage_list.h>
+#include <other/timer.h>
+#include <game/game.h>
+#include <game/scene_manager.h>
 
 using namespace yuu;
 using namespace yuu::app;
@@ -26,7 +29,7 @@ using namespace yuu::graphic;
 class TestClass : public Game
 {
 public:
-	TestClass(WINDOW_SIZE);
+	TestClass(BackBufferSize);
 
 	static const size_t DefaultScreenWidth =1280;
 	static const size_t DefaultScreenHeight =960;
@@ -39,7 +42,7 @@ protected:
 	void draw(float time);
 
 private:
-	FrameRateCounter<> counter;
+	FrameRateCounter<ClockFreqCounter> counter;
 	SceneManager manager;
 
 	static Size real_win_size;

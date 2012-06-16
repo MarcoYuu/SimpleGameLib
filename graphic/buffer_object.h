@@ -1,12 +1,9 @@
 #pragma once
 
-#include <d3d9.h>
-
-#include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include "../other/refference_count.h"
-#include "graphics_device.h"
+#include <other/refference_count.h>
+#include <graphic/forward_declaration.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -17,44 +14,46 @@ namespace graphic
 //--------------------------------------------------------------------------------------------------
 // 頂点バッファ
 //--------------------------------------------------------------------------------------------------
-class VertexBufferObject;
-typedef boost::intrusive_ptr<VertexBufferObject> VertexBuffer;
-
-class VertexBufferObject
-	: public IRefferenceCount<VertexBufferObject>
+class BufferObject
+	: public IRefferenceCount<BufferObject>
 	, boost::noncopyable
 {
 public:
-	virtual size_t write(void *data, size_t size) = 0;
+	virtual ~BufferObject(){}
+
+	// 書き込み
+	virtual size_t write(const void *data, size_t size) = 0;
+	// バッファサイズ
 	virtual size_t length() const = 0;
-	virtual IDirect3DVertexBuffer9 *get() const = 0;
+	// ハンドルの取得
+	virtual void* getHandle() = 0;
+	virtual const void* getHandle() const = 0;
+};
+
+class VertexBufferObject: public BufferObject{
+public:
+	virtual ~VertexBufferObject(){}
 };
 
 //--------------------------------------------------------------------------------------------------
 // 書き込み専用頂点バッファ
 //--------------------------------------------------------------------------------------------------
-class WriteOnlyVertexBufferObject;
-typedef boost::intrusive_ptr<WriteOnlyVertexBufferObject> WriteOnlyVertexBuffer;
-
-class WriteOnlyVertexBufferObject
-	: VertexBufferObject
+class WriteOnlyVertexBufferObject : public VertexBufferObject
 {
 public:
 	static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
-	~WriteOnlyVertexBufferObject() {}
+	~WriteOnlyVertexBufferObject();
 
-	// 書き込み
-	// 戻り値は書き込み時の変更があった場所までの
-	size_t write(void *data, size_t size);
-	// バッファサイズ
+	// 戻り値は書き込めたサイズ、書き込めなかった場合負数
+	size_t write(const void *data, size_t size);
+
 	size_t length() const;
-	// ハンドルの取得
-	IDirect3DVertexBuffer9 *get() const ;
+	void* getHandle();
+	const void* getHandle() const;
 
 private:
-	GraphicDevice m_device;
-	boost::intrusive_ptr<IDirect3DVertexBuffer9> m_vertex_buff;
-	size_t m_size;
+	struct Param;
+	Param *param;
 
 	WriteOnlyVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
 };
@@ -62,25 +61,22 @@ private:
 //--------------------------------------------------------------------------------------------------
 // 動的変更用頂点バッファ
 //--------------------------------------------------------------------------------------------------
-class DynamicVertexBufferObject;
-typedef boost::intrusive_ptr<DynamicVertexBufferObject> DynamicVertexBuffer;
-
-class DynamicVertexBufferObject
-	: VertexBufferObject
+class DynamicVertexBufferObject: public VertexBufferObject
 {
 public:
 	static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
-	~DynamicVertexBufferObject() {}
+	~DynamicVertexBufferObject();
 
-	size_t write(void *data, size_t size);
+	// 戻り値は書き込み時の変更があった場所までのオフセット
+	size_t write(const void *data, size_t size);
+	
 	size_t length() const;
-	IDirect3DVertexBuffer9 *get() const;
+	void* getHandle();
+	const void* getHandle() const;
 
 private:
-	GraphicDevice m_device;
-	boost::intrusive_ptr<IDirect3DVertexBuffer9> m_vertex_buff;
-	size_t m_max_size;
-	size_t m_current_pos;
+	struct Param;
+	Param *param;
 
 	DynamicVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
 };
@@ -88,29 +84,27 @@ private:
 //--------------------------------------------------------------------------------------------------
 // インデックスバッファ
 //--------------------------------------------------------------------------------------------------
-class IndexBufferObject;
-typedef boost::intrusive_ptr<IndexBufferObject> IndexBuffer;
-
-class IndexBufferObject
-	: public IRefferenceCount<IndexBufferObject>
-	, boost::noncopyable
+class IndexBufferObject: public BufferObject
 {
 public:
 	enum IndexFormat
 	{
-		SIZE_16BIT = D3DFMT_INDEX16,
-		SIZE_32BIT = D3DFMT_INDEX32
+		SIZE_16BIT,
+		SIZE_32BIT
 	};
 	static IndexBuffer create(GraphicDevice device, IndexFormat format, size_t size);
-	~IndexBufferObject() {}
+	~IndexBufferObject();
 
-	bool write(void *data, size_t size);
+	// 戻り値は書き込めたサイズ、書き込めなかった場合負数
+	size_t write(const void *data, size_t size);
+
 	size_t length() const;
-	IDirect3DIndexBuffer9 *get() const;
+	void* getHandle();
+	const void* getHandle() const;
 
 private:
-	boost::intrusive_ptr<IDirect3DIndexBuffer9> m_index_buff;
-	size_t m_size;
+	struct Param;
+	Param *param;
 
 	IndexBufferObject(GraphicDevice device, IndexFormat format, size_t size);
 };

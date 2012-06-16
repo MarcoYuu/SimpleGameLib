@@ -1,4 +1,5 @@
-#include "color.h"
+
+#include <graphic/color.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -6,6 +7,7 @@ namespace yuu
 // グラフィック描画関連
 namespace graphic
 {
+
 const Color Color::White   =0xffffffff;
 const Color Color::Black   =0xff000000;
 const Color Color::Red     =0xffff0000;
@@ -24,15 +26,30 @@ Color::Color()
 {
 }
 
-Color::Color(byte4 _color) : color(_color)
+Color::Color(byte4 _color) 
+	: color(_color)
 {
 }
 
-Color::Color(float r, float g, float b, float a) : color(format(r, g, b, a))
+Color::Color( byte r, byte g, byte b )
+	: color(format(r, g, b, 0xff))
+{
+
+}
+
+Color::Color(byte r, byte g, byte b, byte a) 
+	: color(format(r, g, b, a))
 {
 }
 
-Color::Color(byte r, byte g, byte b, byte a) : color(format(r, g, b, a))
+Color::Color( float r, float g, float b )
+	: color(format(r, g, b, 1))
+{
+
+}
+
+Color::Color(float r, float g, float b, float a) 
+	: color(format(r, g, b, a))
 {
 }
 
@@ -41,14 +58,84 @@ void Color::set(byte4 _color)
 	color =_color;
 }
 
-void Color::set(float r, float g, float b, float a)
+void Color::set( byte r, byte g, byte b )
 {
-	color = format(r, g, b, a);
+	color = format(r, g, b, 0xff);
 }
 
 void Color::set(byte r, byte g, byte b, byte a)
 {
 	color = format(r, g, b, a);
+}
+
+void Color::set( float r, float g, float b )
+{
+	color = format(r, g, b, 1);
+}
+
+void Color::set(float r, float g, float b, float a)
+{
+	color = format(r, g, b, a);
+}
+
+void Color::setAlpha( byte val )
+{
+	color =((byte4)(val & 0xff) << 24) | (0x00ffffff & color);
+}
+
+void Color::setAlpha( float val )
+{
+	setAlpha((byte)(0xff*val));
+}
+
+void Color::setRed( byte val )
+{
+	color =((byte4)(val & 0xff) << 16) | (0xff00ffff & color);
+}
+
+void Color::setRed( float val )
+{
+	setRed((byte)(0xff*val));
+}
+
+void Color::setGreen( byte val )
+{
+	color =((byte4)(val & 0xff) << 8) | (0xffff00ff & color);
+}
+
+void Color::setGreen( float val )
+{
+	setGreen((byte)(0xff*val));
+}
+
+void Color::setBlue( byte val )
+{
+	color =((byte4)(val & 0xff)) | (0xffffff00 & color);
+}
+
+void Color::setBlue( float val )
+{
+	setBlue((byte)(0xff*val));
+}
+
+Color::byte Color::getAlpha() const
+{
+	return (byte)((color >> 24)&0xff);
+}
+
+Color::byte Color::getRed() const
+{
+	return (byte)((color >> 16)&0xff);
+}
+
+Color::byte Color::getGreen() const
+{
+	return (byte)((color >> 8)&0xff);
+}
+
+Color::byte Color::getBlue() const
+{
+	return (byte)(color&0xff);
 }
 
 Color::byte4 Color::format(byte r, byte g, byte b, byte a)
@@ -58,7 +145,8 @@ Color::byte4 Color::format(byte r, byte g, byte b, byte a)
 
 Color::byte4 Color::format(float r, float g, float b, float a)
 {
-	return format((byte)(255 * r), (byte)(255 * g), (byte)(255 * b), (byte)(255 * a));
+	return format((byte)(0xff * r), (byte)(0xff * g), (byte)(0xff * b), (byte)(0xff * a));
 }
+
 }
 }

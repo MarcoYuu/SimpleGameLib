@@ -1,10 +1,13 @@
+
+
 #pragma comment(lib, "winmm.lib")
 
-#include "frame_rate_counter.h"
-
 #include <ctime>
+
 #include <windows.h>
 #include <mmsystem.h>
+
+#include <other/timer.h>
 
 //-----------------------------------------------------------------------------------------------
 //clock()関数を用いた時間計測クラス

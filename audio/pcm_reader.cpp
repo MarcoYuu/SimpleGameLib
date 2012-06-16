@@ -1,33 +1,13 @@
 
 
-#pragma warning(disable:4290)
-
 #include <cstring>
 #include <fstream>
-#include "pcm_reader.h"
+
+#include <audio/pcm_reader.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
 {
-//--------------------------------------------------------------------------------------
-//解析機
-//--------------------------------------------------------------------------------------
-IPCMReader::IPCMReader()
-	: m_data_size(0)
-{}
-
-unsigned int IPCMReader::getDataSize() const
-{
-	return m_data_size;
-}
-
-const WAVEFORMATEX *IPCMReader::getWaveFormat(WAVEFORMATEX *wfx) const
-{
-	if(wfx != NULL)
-		*wfx = m_wfx;
-
-	return &m_wfx;
-}
 //--------------------------------------------------------------------------------------
 //Wave解析インタフェース
 //--------------------------------------------------------------------------------------
@@ -36,6 +16,7 @@ WaveFileReader::WaveFileReader()
 	, m_offset_to_data(0)
 	, m_readed(0)
 	, m_filename()
+	, m_data_size(0)
 {
 }
 WaveFileReader::WaveFileReader(const std::string &filename)
@@ -43,11 +24,9 @@ WaveFileReader::WaveFileReader(const std::string &filename)
 	, m_offset_to_data(0)
 	, m_readed(0)
 	, m_filename(filename)
+	, m_data_size(0)
 {
 	Analyze();
-}
-WaveFileReader::~WaveFileReader()
-{
 }
 void WaveFileReader::open(const std::string &filename)
 {
@@ -85,10 +64,10 @@ void WaveFileReader::Analyze()
 	if(memcmp(data, FMT_, sizeof(FMT_)) != 0)
 		throw std::runtime_error("フォーマットが取得できません：" + m_filename);
 	//フォーマットサイズ読み取り
-	std::size_t fmtsize = 0;
+	size_t fmtsize = 0;
 	ifs.read((char *)&fmtsize, sizeof(fmtsize));
 	//フォーマット読み取り
-	ifs.read((char *)&m_wfx, 16);
+	ifs.read((char *)&m_format, 16);
 	//拡張情報読み飛ばし
 	ifs.ignore(fmtsize - 16);
 
@@ -99,7 +78,7 @@ void WaveFileReader::Analyze()
 	if(memcmp(data, FACT, sizeof(FACT)) == 0)
 	{
 		//factがあるときは適当に読み飛ばす
-		std::size_t factsize;
+		size_t factsize;
 		ifs.read((char *)&factsize, sizeof(factsize));
 		ifs.ignore(factsize);
 	}
@@ -112,23 +91,23 @@ void WaveFileReader::Analyze()
 	ifs.read((char *)&m_data_size, sizeof(m_data_size));
 
 	//データ部分までのオフセット値の取得
-	m_offset_to_data = (std::size_t)ifs.tellg();
+	m_offset_to_data = (size_t)ifs.tellg();
 }
-void WaveFileReader::read(void *buff, std::size_t size, std::size_t *readed)
+size_t WaveFileReader::read(void *buff, size_t size)
 {
 	std::ifstream ifs(m_filename.c_str(), std::ios::in | std::ios::binary);
 	ifs.seekg(m_offset_to_data + m_readed);
 	ifs.read((char *)buff, size);
-	*readed = (size_t)ifs.gcount();
-	m_readed += *readed;
+	m_readed += (size_t)ifs.gcount();
+	return m_readed;
 }
 void WaveFileReader::seekToTop()
 {
 	m_readed = 0;
 }
-void WaveFileReader::seek(std::size_t size)
+void WaveFileReader::seek(size_t size)
 {
-	std::size_t tempsize = size;
+	size_t tempsize = size;
 	if(tempsize > m_data_size - m_readed)
 		tempsize = m_data_size - m_readed;
 
@@ -140,4 +119,15 @@ bool WaveFileReader::isEOF() const
 	ifs.seekg(m_offset_to_data + m_readed);
 	return ifs.eof();
 }
+
+size_t WaveFileReader::getDataSize() const
+{
+	return m_data_size;
+}
+
+void WaveFileReader::getWaveFormat( Format *format ) const
+{
+	*format =m_format;
+}
+
 }

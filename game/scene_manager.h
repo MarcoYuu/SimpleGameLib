@@ -2,11 +2,12 @@
 
 #include <list>
 #include <cmath>
+
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include "game.h"
-#include "../other/refference_count.h"
+#include <game/game.h>
+#include <other/refference_count.h>
 
 namespace yuu{
 namespace game{
@@ -86,6 +87,7 @@ public:
 	GraphicDevice getGraphicDevice() const;
 	Controller getController() const;
 
+	// ‚±‚ÌƒV[ƒ“‚ğI—¹‚µ‚Ü‚·
 	void exit();
 
 protected:
@@ -103,6 +105,7 @@ private:
 	double m_transition_on_time;
 	double m_transition_off_time;
 	double m_transition_state; //Active:0, Hidden:1 
+
 	SceneState m_state;
 	SceneManagerComponent &m_manager;
 

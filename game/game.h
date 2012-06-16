@@ -1,14 +1,15 @@
 #pragma once
 
-#include "../other/refference_count.h"
-#include "../other/frame_rate_counter.h"
-#include "../app/windows_app_base.h"
-#include "../graphic/graphics.h"
-#include "../input/input_interface.h"
-
 #include <set>
+
 #include <boost/scoped_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
+
+#include <app/application_base.h>
+#include <graphic/graphics.h>
+#include <input/input_interface.h>
+#include <other/refference_count.h>
+#include <other/timer.h>
 
 namespace yuu{
 namespace game{
@@ -20,6 +21,10 @@ using namespace graphic;
 //-----------------------------------------------------------------------------------------------
 // ゲーム部品
 //-----------------------------------------------------------------------------------------------
+// 
+// Game::addComponent()後にすべてのメソッドが有効になる
+// コンポーネントとして追加されるまではメソッドの有効性は保証されない
+// 
 class Game;
 class IGameComponent : public IRefferenceCount<IGameComponent>
 {
@@ -54,7 +59,7 @@ typedef boost::intrusive_ptr<IGameComponent> GameComponent;
 class Game : public app::WindowsGameBase
 {
 public:
-	Game(const tstring &title, WINDOW_SIZE size, bool fullscreen, bool vsync);
+	Game(const tstring &title, BackBufferSize size, bool fullscreen, bool vsync);
 	virtual ~Game();
 
 	GraphicDevice getGraphicDevice() const;
