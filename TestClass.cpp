@@ -60,7 +60,7 @@ Point2f TestClass::NormalizeCoord( Point2f &point )
 
 float TestClass::WindowSizeRatio()
 {
-	return real_win_size.x/DefaultScreenWidth;
+	return (float)real_win_size.x/DefaultScreenWidth;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -166,9 +166,9 @@ void TestScene::fade()
 		double alpha =getTransitionState();
 		batch->begin();
 		batch->draw(
-			Point2f(win_size.x/2, win_size.y/2), 
+			Point2f(win_size.x/2.0f, win_size.y/2.0f), 
 			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
-			win_size.x, 0);
+			(float)win_size.x, 0.0f);
 		batch->end();			
 	}break;
 
@@ -180,9 +180,9 @@ void TestScene::fade()
 		double alpha =1-getTransitionState();
 		batch->begin();
 		batch->draw(
-			Point2f(win_size.x/2, win_size.y/2), 
+			Point2f(win_size.x/2.0f, win_size.y/2.0f), 
 			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
-			win_size.x, 0);
+			(float)win_size.x, 0);
 		batch->end();
 	}break;
 	}
@@ -197,8 +197,8 @@ TestObject::TestObject( GraphicDevice dev )
 	, tex()
 	, count(0)
 	, rot(0)
-	, position(0,0)
-	, velocity(10,10)
+	, position(0.0f,0.0f)
+	, velocity(10.0f,10.0f)
 	, bullets(BULLET_NUM, sizeof(Bullet))
 {
 	batch =SpriteBatchSystem::create(dev, BULLET_NUM);
@@ -274,9 +274,9 @@ void TestObject::draw()
 }
 
 TestObject::Bullet::Bullet( TestObject *p ) 
-	: position(0,0)
-	, velocity(0,0)
-	, accel(0,0)
+	: position(0.0f,0.0f)
+	, velocity(0.0f,0.0f)
+	, accel(0.0f,0.0f)
 	, parent(p)
 {
 
@@ -307,5 +307,5 @@ bool TestObject::Bullet::update()
 
 void TestObject::Bullet::draw()
 {
-	parent->batch->draw(position, Color::White&0x80ffffff, 0.5f*TestClass::WindowSizeRatio(), 0);
+	parent->batch->draw(position, Color::White & 0x80ffffff, 0.5f*TestClass::WindowSizeRatio(), 0);
 }

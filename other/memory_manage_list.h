@@ -3,8 +3,24 @@
 #include <new>
 #include <vector>
 #include <cassert>
-#include <boost/utility.hpp>
 
+//--------------------------------------------------------------------------
+// 実体を内部で保持するアロケータ+リストなコンテナ
+//--------------------------------------------------------------------------
+// ・内部的に最低 max_num*max_size のメモリを確保する
+// 
+// ・construct するとメモリに空きがある場合そこにオブジェクトを配置する
+// 　オブジェクトのサイズによってはメモリ領域は無駄になる
+// 
+// ・継承先のクラスであれば基底クラスのリスト上にも構築できるが、
+// 　max_sizeを超過するような派生クラスは構築できない
+// 
+// ・リストのコピー時に内容はコピーされない.コピーされるのは
+// 　格納される型情報や確保されたメモリサイズのみである
+// 
+// ・構築の時間はstd::list等とは比較にならないくらい大きいが
+// 　追加/削除時の時間は大体最低1/3程度にまで抑えられる
+//
 template<typename T>
 class MemoryManageList
 {
@@ -19,6 +35,7 @@ public:
 		: MAX_ELEMENT_NUM(max_num)
 		, MAX_OBJECT_SIZE(max_size)
 		, free_num(max_num)
+		, memory(MAX_ELEMENT_NUM*MAX_OBJECT_SIZE)
 		, storage(max_num)
 	{
 		// 最大サイズがT未満ならアサート
@@ -26,7 +43,7 @@ public:
 
 		// ストレージの確保
 		for (size_t i=0;i<MAX_ELEMENT_NUM;++i){
-			storage[i].memory.resize(MAX_OBJECT_SIZE);
+			storage[i].memory =memory.data()+i*MAX_OBJECT_SIZE;
 		}
 		// リストの初期化
 		resetList();
@@ -35,16 +52,30 @@ public:
 		: MAX_ELEMENT_NUM(rhs.MAX_ELEMENT_NUM)
 		, MAX_OBJECT_SIZE(rhs.MAX_OBJECT_SIZE)
 		, free_num(rhs.MAX_ELEMENT_NUM)
-		, storage(rhs.storage)
+		, memory(rhs.MAX_ELEMENT_NUM*rhs.MAX_OBJECT_SIZE)
+		, storage(rhs.MAX_ELEMENT_NUM)
 	{
-		// リストの初期化
+		// ストレージの確保
+		for (size_t i=0;i<MAX_ELEMENT_NUM;++i){
+			storage[i].memory =memory.data()+i*MAX_OBJECT_SIZE;
+		}
 		resetList();
 	}
 	MemoryManageList& operator=(const MemoryManageList& rhs){
 		MAX_ELEMENT_NUM =rhs.MAX_ELEMENT_NUM;
 		MAX_OBJECT_SIZE =rhs.MAX_OBJECT_SIZE;
-		free_num =rhs.MAX_ELEMENT_NUM;
-		storage =rhs.storage;
+		free_num        =rhs.MAX_ELEMENT_NUM;
+
+		// メモリ確保と切り詰め
+		memory.resize(rhs.MAX_ELEMENT_NUM*rhs.MAX_OBJECT_SIZE);
+		std::vector<char>(memory).swap(memory);
+		storage.resize(rhs.MAX_ELEMENT_NUM);
+		std::vector<Node>(storage).swap(storage);
+
+		// ストレージの確保
+		for (size_t i=0;i<MAX_ELEMENT_NUM;++i){
+			storage[i].memory =memory.data()+i*MAX_OBJECT_SIZE;
+		}
 		resetList();
 	}
 
@@ -66,6 +97,7 @@ public:
 		// すべての使用中オブジェクトを開放
 		for (Node* n =head_active.next; n!=&head_active; n =n->next)
 			node_cast(n)->~value_type();
+
 		// リストのリセット
 		resetList();
 	}
@@ -135,7 +167,8 @@ public:
 
 		void* mem =getNextFreeStorage();
 		if (mem != NULL){
-			return new(mem) Class();
+			value_type *result =new(mem) Class();
+			return (Class*)result;
 		}
 		return NULL;
 	}
@@ -148,14 +181,15 @@ public:
 
 		void* mem =getNextFreeStorage();
 		if (mem != NULL){
-			return new(mem) Class(arg);
+			value_type *result =new(mem) Class(arg);
+			return (Class*)result;
 		}
 		return NULL;
 	}
 
 private:
 	struct Node{
-		std::vector<char> memory;
+		char* memory;
 		Node* prev;
 		Node* next;
 	};
@@ -163,13 +197,14 @@ private:
 	const size_t MAX_OBJECT_SIZE;
 	size_t free_num;
 
+	std::vector<char> memory;
 	std::vector<Node> storage;
 	Node head_active;
 	Node head_free;
 
 private:
 	inline static value_type* node_cast(Node* node){
-		return (value_type*)(node->memory.data());
+		return (value_type*)(node->memory);
 	}
 
 	void* getNextFreeStorage(){
@@ -190,7 +225,7 @@ private:
 
 			return (void*)node_cast(result);
 		}
-		return (void*)NULL;
+		return NULL;
 	}
 
 	void resetList(){
@@ -198,11 +233,12 @@ private:
 		head_active.next =head_active.prev =&head_active;
 
 		// 未使用リストの初期化
-		head_free.next =&storage[0];
-		head_free.prev =&storage[MAX_ELEMENT_NUM-1];
+		head_free.next  =&storage[0];
+		head_free.prev  =&storage[MAX_ELEMENT_NUM-1];
 		storage[0].prev =&head_free;
+
 		for (size_t i=0;i<MAX_ELEMENT_NUM-1;++i){
-			storage[i].next =&storage[i+1];
+			storage[i].next   =&storage[i+1];
 			storage[i+1].prev =&storage[i];
 		}
 		storage[MAX_ELEMENT_NUM-1].next =&head_free;

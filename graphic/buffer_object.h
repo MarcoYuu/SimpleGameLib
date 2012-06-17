@@ -12,7 +12,7 @@ namespace yuu
 namespace graphic
 {
 //--------------------------------------------------------------------------------------------------
-// 頂点バッファ
+// バッファ
 //--------------------------------------------------------------------------------------------------
 class BufferObject
 	: public IRefferenceCount<BufferObject>
@@ -30,6 +30,7 @@ public:
 	virtual const void* getHandle() const = 0;
 };
 
+// 頂点バッファ
 class VertexBufferObject: public BufferObject{
 public:
 	virtual ~VertexBufferObject(){}
@@ -87,11 +88,7 @@ private:
 class IndexBufferObject: public BufferObject
 {
 public:
-	enum IndexFormat
-	{
-		SIZE_16BIT,
-		SIZE_32BIT
-	};
+	enum IndexFormat{ SIZE_16BIT, SIZE_32BIT };
 	static IndexBuffer create(GraphicDevice device, IndexFormat format, size_t size);
 	~IndexBufferObject();
 

@@ -1,0 +1,4 @@
+,Creation Time [sec],Construct Time [sec],Iteration Time [sec],Erase Time [sec],Clear Time sec],New and Delete Time [sec]
+MemoryManageList,0.0616724,0.0045474,0.0267726,0.00506488,0.00695588,0.00752528,
+std::list,1.7109e-005,0.0342865,0.0305618,0.0657509,0.0174854,0.113232,
+std::list(shared),3.00159e-006,0.041146,0.0299447,0.0714374,0.0199344,0.116299,

@@ -9,8 +9,11 @@
 
 #include <graphic/graphics_device.h>
 #include <graphic/buffer_object.h>
+#include <graphic/texture.h>
 #include <graphic/color.h>
 #include <other/utility.h>
+
+#include <other/com_release.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -62,6 +65,7 @@ struct GraphicDeviceManager::Param{
 
 	boost::intrusive_ptr<IDirect3D9> direct3D9;
 	boost::intrusive_ptr<IDirect3DDevice9> direct3D9Device;
+	boost::intrusive_ptr<IDirect3DSurface9> backBuffer;
 
 	Size size;
 	bool initialized;
@@ -69,6 +73,8 @@ struct GraphicDeviceManager::Param{
 	Param()
 		: direct3D9(0)
 		, direct3D9Device(0)
+		, backBuffer(0)
+		, size()
 		, initialized(false)
 	{}
 };
@@ -102,9 +108,9 @@ void GraphicDeviceManager::Init(Window window, int WindowWidth, int WindowHeight
 	if(param->initialized)
 		return;
 
-	param->size.set((float)WindowWidth, (float)WindowHeight);
+	param->size.set(WindowWidth, WindowHeight);
 
-	IDirect3DDevice9 *device = 0;
+	IDirect3DDevice9 *device = NULL;
 	try
 	{
 		//Direct3Dの初期化
@@ -118,33 +124,33 @@ void GraphicDeviceManager::Init(Window window, int WindowWidth, int WindowHeight
 
 		D3DPRESENT_PARAMETERS d3dpp =
 		{
-			static_cast<UINT>(WindowWidth),	//バックバッファ幅
-			static_cast<UINT>(WindowHeight),//バックバッファ高さ
-			d3ddm.Format,					//画面フォーマット情報
-			1,								//バックバッファ数
-			D3DMULTISAMPLE_NONE,			//マルチサンプルをどうするか
-			0,								//マルチサンプルの品質
-			D3DSWAPEFFECT_DISCARD,			//スワップの際の処理
-			NULL,							//画面を描画するウィンドウハンドル
-			bWindowed ? TRUE : FALSE,		//スクリーンモード	TRUE:ウィンドウ,FALSE:フルスクリーン
-			TRUE,							//深度･ステンシルバッファの作成
-			D3DFMT_D24S8,					//ステンシルバッファフォーマット
-			0,								//バッファ転送時のオプションフラグ
-			D3DPRESENT_RATE_DEFAULT,		//フルスクリーンでのリフレッシュレート
-			bVSync ?						//スワップタイミング
+			static_cast<UINT>(WindowWidth),	// バックバッファ幅
+			static_cast<UINT>(WindowHeight),// バックバッファ高さ
+			d3ddm.Format,					// 画面フォーマット情報
+			1,								// バックバッファ数
+			D3DMULTISAMPLE_NONE,			// マルチサンプルをどうするか
+			0,								// マルチサンプルの品質
+			D3DSWAPEFFECT_DISCARD,			// スワップの際の処理
+			NULL,							// 画面を描画するウィンドウハンドル
+			bWindowed ? TRUE : FALSE,		// スクリーンモード	TRUE:ウィンドウ,FALSE:フルスクリーン
+			TRUE,							// 深度･ステンシルバッファの作成
+			D3DFMT_D24S8,					// ステンシルバッファフォーマット
+			0,								// バッファ転送時のオプションフラグ
+			D3DPRESENT_RATE_DEFAULT,		// フルスクリーンでのリフレッシュレート
+			bVSync ?						// スワップタイミング
 			D3DPRESENT_INTERVAL_DEFAULT :
 			D3DPRESENT_INTERVAL_IMMEDIATE
 		};
 
 		//デバイスの作成
 		if(FAILED(param->direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-											window->getHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &device)))
+											(HWND)window->getHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &device)))
 			if(FAILED(param->direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-												window->getHandle(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &device)))
+												(HWND)window->getHandle(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &device)))
 				if(FAILED(param->direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF,
-													window->getHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &device)))
+													(HWND)window->getHandle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &device)))
 					if(FAILED(param->direct3D9->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF,
-														window->getHandle(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &device)))
+														(HWND)window->getHandle(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &device)))
 						throw std::runtime_error("Direct3D9の初期化に失敗");
 	}
 	catch(std::runtime_error &e)
@@ -153,6 +159,15 @@ void GraphicDeviceManager::Init(Window window, int WindowWidth, int WindowHeight
 		throw e;
 	}
 	param->direct3D9Device = device;
+
+	// バックバッファへの参照の獲得
+	IDirect3DSurface9* back =NULL;
+	if(FAILED(param->direct3D9Device->GetRenderTarget(0, &back))){
+		throw std::runtime_error("バックバッファへの参照の獲得に失敗");
+	}
+	param->backBuffer =back;
+
+	// 初期化完了
 	param->initialized =true;
 }
 
@@ -170,8 +185,8 @@ void GraphicDeviceManager::enableLighting( bool enable )
 void GraphicDeviceManager::setCullingMode( CullingMode mode)
 {
 	param->direct3D9Device->SetRenderState(D3DRS_CULLMODE, 
-		(mode==NONE)? D3DCULL_NONE: 
-		(mode==RIGHT_HANDED)? RIGHT_HANDED:
+		(mode==NONE)?			D3DCULL_NONE: 
+		(mode==RIGHT_HANDED)?	RIGHT_HANDED:
 		LEFT_HANDED);
 }
 
@@ -269,6 +284,21 @@ void* GraphicDeviceManager::getHandle()
 const void* GraphicDeviceManager::getHandle() const
 {
 	return param->direct3D9Device.get();
+}
+
+void GraphicDeviceManager::setRenderTarget( RenderTerget target, int index )
+{
+	IDirect3DTexture9* tex =(IDirect3DTexture9*)target->getHandle();
+
+	IDirect3DSurface9* render =NULL;
+	tex->GetSurfaceLevel(0, &render);
+	param->direct3D9Device->SetRenderTarget(index, render);
+	SafeRelease(render);
+}
+
+void GraphicDeviceManager::resetRenderTargetToBackBuffer()
+{
+	param->direct3D9Device->SetRenderTarget(0, param->backBuffer.get());
 }
 
 

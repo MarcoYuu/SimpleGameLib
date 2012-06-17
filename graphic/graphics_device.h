@@ -111,6 +111,10 @@ public:
 	// 画面のフリップ
 	int present();
 
+	// レンダーターゲットの変更
+	void setRenderTarget(RenderTerget target, int index);
+	void resetRenderTargetToBackBuffer();
+
 	// バッファをクリア
 	void clear();
 	void clear(Color color);

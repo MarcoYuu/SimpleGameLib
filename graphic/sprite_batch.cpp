@@ -11,6 +11,8 @@
 #include <graphic/sprite_batch.h>
 #include <graphic/graphics_device.h>
 
+#include <other/com_release.h>
+
 // 自分のライブラリの名前空間
 namespace yuu
 {
@@ -43,8 +45,8 @@ struct SpriteBatchSystem::Param{
 	boost::intrusive_ptr<ID3DXEffect> effect;
 	boost::intrusive_ptr<IDirect3DVertexDeclaration9> declaration;
 
-	int current_sprite_num;
-	int max_sprite_num;
+	size_t current_sprite_num;
+	size_t max_sprite_num;
 
 	Param(GraphicDevice device_, size_t max_sprite_)
 		: device(device_)
@@ -86,12 +88,14 @@ void SpriteBatchSystem::end()
 	size_t offset = param->vertex_buff->write(param->vertex_list.data(), param->current_sprite_num * 4 * sizeof(SpriteVertex));
 
 	// 状態設定
+	SizeFloat back_buf =param->device->getBackBufferSize().type_cast<float>();
+	SizeFloat tex_size =param->texture->getSize().type_cast<float>();
 	param->effect->SetTechnique("ParameterVertex");
-	param->effect->SetFloatArray("ViewportSize", param->device->getBackBufferSize().toAry(), 2);
+	param->effect->SetFloatArray("ViewportSize", back_buf.toAry(), 2);
 	if( param->texture!=NULL && 
 		param->texture->getHandle()!=NULL)
 	{
-		param->effect->SetFloatArray("TextureSize", param->texture->getSize().toAry(), 2);
+		param->effect->SetFloatArray("TextureSize", tex_size.toAry(), 2);
 		param->effect->SetTexture("Texture", (IDirect3DTexture9*)param->texture->getHandle());
 	}
 
@@ -112,10 +116,10 @@ void SpriteBatchSystem::end()
 		// 描画
 		dev->DrawIndexedPrimitive(
 			D3DPT_TRIANGLELIST, 0,
-			offset / sizeof(SpriteVertex),				// 最小インデックス、バッファにあらかじめ含まれる頂点の個数
-			param->current_sprite_num * 4,					// 最少インデックス以降に含まれる頂点数。とりあえずスプライトの個数から決め打ち
-			offset * 6 / (sizeof(SpriteVertex) * 4),	// 描画処理するインデックスまでのオフセット。入っていたスプライト数*6
-			param->current_sprite_num * 2					// 描画されるポリゴンの個数
+			(UINT)offset / sizeof(SpriteVertex),				// 最小インデックス、バッファにあらかじめ含まれる頂点の個数
+			(UINT)param->current_sprite_num * 4,					// 最少インデックス以降に含まれる頂点数。とりあえずスプライトの個数から決め打ち
+			(UINT)offset * 6 / (sizeof(SpriteVertex) * 4),	// 描画処理するインデックスまでのオフセット。入っていたスプライト数*6
+			(UINT)param->current_sprite_num * 2					// 描画されるポリゴンの個数
 		);
 	}
 	// パスの終了
@@ -190,11 +194,11 @@ void SpriteBatchSystem::setIndices()
 	//   |   |
 	//   +---+
 	//   3   2
-	int indexCount = param->max_sprite_num * 6;
+	size_t indexCount = param->max_sprite_num * 6;
 	std::vector<short> indices(indexCount);
 
 	short vertexIndex = 0;
-	for(int i = 0; i < indexCount; i += 6)
+	for(size_t i = 0; i < indexCount; i += 6)
 	{
 		indices[i + 0] = (short)(vertexIndex + 0);
 		indices[i + 1] = (short)(vertexIndex + 1);

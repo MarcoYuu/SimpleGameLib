@@ -5,7 +5,9 @@
 
 #pragma once
 
+#if defined(_WIN32) | defined(_WIN64)
 #include <windows.h>
+#endif
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
@@ -29,13 +31,12 @@ typedef boost::intrusive_ptr<WindowBase> Window;
 // ウィンドウタイプ
 enum WindowType
 {
-	DEFAULT = WS_OVERLAPPEDWINDOW,	// <通常
-	SIMPLE1 = WS_POPUP | WS_DLGFRAME | WS_SYSMENU | WS_CAPTION,	// <シンプル1
-	SIMPLE2 = WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX	// <シンプル2
+	WT_DEFAULT,	// 通常
+	WT_SIMPLE1,	// シンプル1
+	WT_SIMPLE2	// シンプル2
 };
 
 // ウィンドウ基礎クラス
-// 継承してプロシージャを変更できる\n
 class WindowBase
 	: public IRefferenceCount<WindowBase>
 	, boost::noncopyable
@@ -43,40 +44,54 @@ class WindowBase
 public:
 	static Window create(
 		tstring name, 
-		int width = 800, 
-		int height = 600,
-		WindowType style = SIMPLE2, 
-		bool consider_frame = true);
-	virtual ~WindowBase() {}
+		int width           = 800, 
+		int height          = 600,
+		WindowType style    = WT_SIMPLE2, 
+		bool consider_frame = true
+	);
+	virtual ~WindowBase();
 
+	// ウィンドウの破棄
 	void destroy();
+	// ウィンドウの表示・非表示の切り替え
 	void show(bool bShow = true);
 
+	// 幅の取得
 	int getWidth() const;
+	// 高さの取得
 	int getHeight() const;
-	HWND getHandle() const;
+	// ハンドルの取得
+	void* getHandle() const;
+	// ウィンドウ名の取得
+	const tstring& getName() const;
 
 	bool isActive();
 	void setSize(int x, int y, int width, int height);
-	void setTitle(tstring title);
+	void setName(tstring title);
 
 	void showCursor(bool show);
 
 protected:
-	virtual LRESULT windowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+#if defined(_WIN32) | defined(_WIN64)
+	// プロシージャ(書き換え可能)
+	virtual LRESULT callbackProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+	// オーバーライドする場合ウィンドウクラスの登録をしなければならない
 	virtual bool initWindowClass();
+	// 実際にウィンドウを作成し、ハンドルを登録しなければならない
 	virtual bool initWindowInstance(WindowType style, bool consider_frame);
+	// ハンドルの登録
+	void setHandle(void* handle);
+#endif
 
 private:
-	HWND m_hWnd;
+	struct Param;
+	Param *param;
 
-	tstring m_name;
-	tstring m_title;
-	int m_width;
-	int m_height;
-
-	static LRESULT CALLBACK dummyProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 	WindowBase(tstring name, int width, int height, WindowType style, bool consider_frame);
+
+#if defined(_WIN32) | defined(_WIN64)
+	static LRESULT CALLBACK procedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+#endif	
 };
 }
 }

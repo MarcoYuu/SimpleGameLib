@@ -47,17 +47,49 @@ public:
 	T x, y;
 
 public:
-	Vector2(): x(0), y(0) {}
-	Vector2(T _x, T _y): x(_x), y(_y) {}
-	Vector2(const Vector2 &rhs): x(rhs.x), y(rhs.y) {}
+	//---------------------------
+	// Constructors
+	//---------------------------
+	Vector2()
+		: x(0)
+		, y(0) 
+	{}
+	Vector2(T _x, T _y)
+		: x(_x)
+		, y(_y) 
+	{}
+	Vector2(const T *ary)
+		: x(ary[0])
+		, y(ary[1]) 
+	{}
+
+	Vector2(const Vector2 &rhs)
+		: x(rhs.x)
+		, y(rhs.y) 
+	{}
+	template<typename U>
+	Vector2(const Vector2<U> &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+	{}
+
 	Vector2 &operator=(const Vector2 &rhs)
 	{
 		x = rhs.x;
 		y = rhs.y;
 		return *this;
 	}
-	~Vector2() {}
+	template<typename U>
+	Vector2 &operator=(const Vector2<U> &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		return *this;
+	}
 
+	//---------------------------
+	// set value
+	//---------------------------
 	void set(T x, T y)
 	{
 		this->x = x;
@@ -69,6 +101,9 @@ public:
 		y = ary[1];
 	}
 
+	//---------------------------
+	// to array
+	//---------------------------
 	T *toAry()
 	{
 		return &x;
@@ -78,23 +113,33 @@ public:
 		return &x;
 	}
 
-	const T sumsq() const
+	//---------------------------
+	// utilities
+	//---------------------------
+	T sumsq() const
 	{
 		return x * x + y * y;
 	}
-	const T abs() const
+	T abs() const
 	{
 		return sqrt(sumsq());
 	}
-	const T dot(const Vector2 &rhs) const
+	T dot(const Vector2 &rhs) const
 	{
 		return x * rhs.x + y * rhs.y;
 	}
-	const T closs(const Vector2 &rhs) const
+	T closs(const Vector2 &rhs) const
 	{
 		return x * rhs.x - y * rhs.y;
 	}
+	template<typename U>
+	Vector2<U> type_cast() const{
+		return Vector2<U>(static_cast<U>(x), static_cast<U>(y));
+	}
 
+	//---------------------------
+	// operators
+	//---------------------------
 	bool operator==(const Vector2 &rhs) const
 	{
 		return (x == rhs.x && y == rhs.y);
@@ -104,64 +149,61 @@ public:
 		return !((*this) == rhs);
 	}
 
-	const Vector2 operator+()
+	Vector2 operator+() const
 	{
 		return *this;
 	}
-	const Vector2 operator-()
+	Vector2 operator-() const
 	{
 		return Vector2(-x, -y);
 	}
-	const Vector2 &operator+=(const Vector2 &rhs)
+
+	const Vector2& operator+=(const Vector2 &rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
 		return *this;
 	}
-	const Vector2 &operator-=(const Vector2 &rhs)
+	const Vector2& operator-=(const Vector2 &rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
 		return *this;
 	}
-	const Vector2 &operator*=(const T &rhs)
+	const Vector2& operator*=(const T &rhs)
 	{
 		x *= rhs;
 		y *= rhs;
 		return *this;
 	}
-	const Vector2 &operator/=(const T &rhs)
+	const Vector2& operator/=(const T &rhs)
 	{
 		x /= rhs;
 		y /= rhs;
 		return *this;
 	}
+
+	friend Vector2<T> operator+(const Vector2<T> &lhs, const Vector2<T> &rhs)
+	{
+		return Vector2<T>(lhs.x + rhs.x, lhs.y + rhs.y);
+	}
+	friend Vector2<T> operator-(const Vector2<T> &lhs, const Vector2<T> &rhs)
+	{
+		return Vector2<T>(lhs.x - rhs.x, lhs.y - rhs.y);
+	}
+	friend Vector2<T> operator*(const T &lhs, const Vector2<T> &rhs)
+	{
+		return Vector2<T>(rhs.x * lhs, rhs.y * lhs);
+	}
+	friend Vector2<T> operator*(const Vector2<T> &lhs, const T &rhs)
+	{
+		return Vector2<T>(lhs.x * rhs, lhs.y * rhs);
+	}
+	friend Vector2<T> operator/(const Vector2<T> &lhs, const T &rhs)
+	{
+		return Vector2<T>(lhs.x / rhs, lhs.y / rhs);
+	}
 };
-template<typename T>
-const Vector2<T> operator+(const Vector2<T> &lhs, const Vector2<T> &rhs)
-{
-	return Vector2<T>(lhs.x + rhs.x, lhs.y + rhs.y);
-}
-template<typename T>
-const Vector2<T> operator-(const Vector2<T> &lhs, const Vector2<T> &rhs)
-{
-	return Vector2<T>(lhs.x - rhs.x, lhs.y - rhs.y);
-}
-template<typename T, typename U>
-const Vector2<T> operator*(const U &lhs, const Vector2<T> &rhs)
-{
-	return Vector2<T>(rhs.x * lhs, rhs.y * lhs);
-}
-template<typename T, typename U>
-const Vector2<T> operator*(const Vector2<T> &lhs, const U &rhs)
-{
-	return Vector2<T>(lhs.x * rhs, lhs.y * rhs);
-}
-template<typename T, typename U>
-const Vector2<T> operator/(const Vector2<T> &lhs, const U &rhs)
-{
-	return Vector2<T>(lhs.x / rhs, lhs.y / rhs);
-}
 
 //-----------------------------------------------------------------------------------------------
 //3次元ベクトル
@@ -173,9 +215,37 @@ public:
 	T x, y, z;
 
 public:
-	Vector3(): x(0), y(0), z(0) {}
-	Vector3(T _x, T _y, T _z): x(_x), y(_y), z(_z) {}
-	Vector3(const Vector3 &rhs): x(rhs.x), y(rhs.y), z(rhs.z) {}
+	//---------------------------
+	// Constructors
+	//---------------------------
+	Vector3()
+		: x(0)
+		, y(0)
+		, z(0) 
+	{}
+	Vector3(T _x, T _y, T _z)
+		: x(_x)
+		, y(_y)
+		, z(_z) 
+	{}
+	Vector3(const T *ary)
+		: x(ary[0])
+		, y(ary[1])
+		, z(ary[2]) 
+	{}
+
+	Vector3(const Vector3 &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z) 
+	{}
+	template<typename U>
+	Vector3(const Vector3<U> &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z) 
+	{}
+
 	Vector3 &operator=(const Vector3 &rhs)
 	{
 		x = rhs.x;
@@ -183,8 +253,18 @@ public:
 		z = rhs.z;
 		return *this;
 	}
-	~Vector3() {}
+	template<typename U>
+	Vector3 &operator=(const Vector3<U> &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
+		return *this;
+	}
 
+	//---------------------------
+	// set value
+	//---------------------------
 	void set(T x, T y, T z)
 	{
 		this->x = x;
@@ -198,6 +278,9 @@ public:
 		z = ary[2];
 	}
 
+	//---------------------------
+	// to array
+	//---------------------------
 	T *toAry()
 	{
 		return &x;
@@ -207,23 +290,33 @@ public:
 		return &x;
 	}
 
-	const T sumsq() const
+	//---------------------------
+	// utilities
+	//---------------------------
+	T sumsq() const
 	{
 		return x * x + y * y + z * z;
 	}
-	const T abs() const
+	T abs() const
 	{
 		return sqrt(sumsq());
 	}
-	const T dot(const Vector3 &rhs) const
+	T dot(const Vector3 &rhs) const
 	{
 		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
-	const Vector3 closs(const Vector3 &rhs) const
+	Vector3 closs(const Vector3 &rhs) const
 	{
 		return Vector3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 	}
+	template<typename U>
+	Vector3<U> type_cast() const{
+		return Vector3<U>(static_cast<U>(x), static_cast<U>(y), static_cast<U>(z));
+	}
 
+	//---------------------------
+	// operators
+	//---------------------------
 	bool operator==(const Vector3 &rhs) const
 	{
 		return (x == rhs.x && y == rhs.y && z == rhs.z);
@@ -233,68 +326,66 @@ public:
 		return !((*this) == rhs);
 	}
 
-	const Vector3 operator+()
+	Vector3 operator+()
 	{
 		return *this;
 	}
-	const Vector3 operator-()
+	Vector3 operator-()
 	{
 		return Vector3(-x, -y, -z);
 	}
-	const Vector3 &operator+=(const Vector3 &rhs)
+
+	const Vector3& operator+=(const Vector3 &rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
 		z += rhs.z;
 		return *this;
 	}
-	const Vector3 &operator-=(const Vector3 &rhs)
+	const Vector3& operator-=(const Vector3 &rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
 		z -= rhs.z;
 		return *this;
 	}
-	const Vector3 &operator*=(const T &rhs)
+	const Vector3& operator*=(const T &rhs)
 	{
 		x *= rhs;
 		y *= rhs;
 		z *= rhs;
 		return *this;
 	}
-	const Vector3 &operator/=(const T &rhs)
+	const Vector3& operator/=(const T &rhs)
 	{
 		x /= rhs;
 		y /= rhs;
 		z /= rhs;
 		return *this;
 	}
+
+	friend Vector3<T> operator+(const Vector3<T> &lhs, const Vector3<T> &rhs)
+	{
+		return Vector3<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+	}
+	friend Vector3<T> operator-(const Vector3<T> &lhs, const Vector3<T> &rhs)
+	{
+		return Vector3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+	}
+	friend Vector3<T> operator*(const T &lhs, const Vector3<T> &rhs)
+	{
+		return Vector3<T>(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+	}
+	friend Vector3<T> operator*(const Vector3<T> &lhs, const T &rhs)
+	{
+		return Vector3<T>(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z);
+	}
+	friend Vector3<T> operator/(const Vector3<T> &lhs, const T &rhs)
+	{
+		return Vector3<T>(lhs.x / rhs, lhs.y / rhs, lhs.y / rhs);
+	}
 };
-template<typename T>
-const Vector3<T> operator+(const Vector3<T> &lhs, const Vector3<T> &rhs)
-{
-	return Vector3<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
-}
-template<typename T>
-const Vector3<T> operator-(const Vector3<T> &lhs, const Vector3<T> &rhs)
-{
-	return Vector3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
-}
-template<typename T, typename U>
-const Vector3<T> operator*(const U &lhs, const Vector3<T> &rhs)
-{
-	return Vector3<T>(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
-}
-template<typename T, typename U>
-const Vector3<T> operator*(const Vector3<T> &lhs, const U &rhs)
-{
-	return Vector3<T>(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z);
-}
-template<typename T, typename U>
-const Vector3<T> operator/(const Vector3<T> &lhs, const U &rhs)
-{
-	return Vector3<T>(lhs.x / rhs, lhs.y / rhs, lhs.y / rhs);
-}
+
 
 //-----------------------------------------------------------------------------------------------
 //4次元ベクトル
@@ -303,46 +394,116 @@ template<typename T>
 class Vector4
 {
 public:
-	T x, y, z, W;
+	T x, y, z, w;
 
 public:
-	Vector4(): x(0), y(0), z(0), W(0) {}
-	Vector4(T x, T y, T z, T w): x(x), y(y), z(z), W(w) {}
-	Vector4(const Vector3<T> &rhs): x(rhs.x), y(rhs.y), z(rhs.z), W(1.0) {}
-	Vector4(const Vector4 &rhs): x(rhs.x), y(rhs.y), z(rhs.z), W(rhs.W) {}
+	//---------------------------
+	// Constructors
+	//---------------------------
+	Vector4()
+		: x(0)
+		, y(0)
+		, z(0)
+		, w(0) 
+	{}
+	Vector4(T x, T y, T z, T w)
+		: x(x)
+		, y(y)
+		, z(z)
+		, w(w) 
+	{}
+	Vector4(const T *ary)
+		: x(ary[0])
+		, y(ary[1])
+		, z(ary[2]) 
+		, w(ary[3])
+	{}
+
+	Vector4(const Vector3<T> &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z)
+		, w(1.0) 
+	{}
+	template<typename U>
+	Vector4(const Vector3<U> &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z)
+		, w(1.0) 
+	{}
+
+	Vector4(const Vector4 &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z)
+		, w(rhs.w) 
+	{}
+	template<typename U>
+	Vector4(const Vector4<U> &rhs)
+		: x(rhs.x)
+		, y(rhs.y)
+		, z(rhs.z)
+		, w(rhs.w) 
+	{}
+
 	Vector4 &operator=(const Vector3<T> &rhs)
 	{
 		x = rhs.x;
 		y = rhs.y;
 		z = rhs.z;
-		W = 1.0;
+		w = 1.0;
 		return *this;
 	}
+	template<typename U>
+	Vector4 &operator=(const Vector3<U> &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
+		w = 1.0;
+		return *this;
+	}
+
 	Vector4 &operator=(const Vector4 &rhs)
 	{
 		x = rhs.x;
 		y = rhs.y;
 		z = rhs.z;
-		W = rhs.W;
+		w = rhs.w;
 		return *this;
 	}
-	~Vector4() {}
+	template<typename U>
+	Vector4 &operator=(const Vector4<U> &rhs)
+	{
+		x = rhs.x;
+		y = rhs.y;
+		z = rhs.z;
+		w = rhs.w;
+		return *this;
+	}
 
+	//---------------------------
+	// set value
+	//---------------------------
 	void set(T x, T y, T z, T w)
 	{
 		x = x;
 		y = y;
 		z = z;
-		W = w;
+		w = w;
 	}
 	void set(const T *ary)
 	{
 		x = ary[0];
 		y = ary[1];
 		z = ary[2];
-		W = ary[3];
+		w = ary[3];
 	}
 
+	//---------------------------
+	// to array
+	//---------------------------
 	T *toAry()
 	{
 		return &x;
@@ -352,110 +513,134 @@ public:
 		return &x;
 	}
 
-	const T sumsq() const
+	//---------------------------
+	// utilities
+	//---------------------------
+	T sumsq() const
 	{
-		return x * x + y * y + z * z + W * W;
+		return x * x + y * y + z * z + w * w;
 	}
-	const T sumsq3D() const
+	T sumsq3D() const
 	{
 		return x * x + y * y + z * z;
 	}
-	const T abs() const
+	T abs() const
 	{
 		return sqrt(sumsq());
 	}
-	const T abs3D() const
+	T abs3D() const
 	{
 		return sqrt(sumsq3D());
 	}
-	const T dot(const Vector4 &rhs) const
+	T dot(const Vector4 &rhs) const
 	{
-		return x * rhs.x + y * rhs.y + z * rhs.z + W * rhs.W;
+		return x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w;
 	}
-	const T dot3D(const Vector4 &rhs) const
+	T dot3D(const Vector4 &rhs) const
 	{
 		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
-	const Vector3<T> closs3D(const Vector4 &rhs) const
+	Vector3<T> closs3D(const Vector4 &rhs) const
 	{
 		return Vector3<T>(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x);
 	}
+	template<typename U>
+	Vector4<U> type_cast() const{
+		return Vector4<U>(
+			static_cast<U>(x), static_cast<U>(y), 
+			static_cast<U>(z), static_cast<U>(w));
+	}
 
+	//---------------------------
+	// operators
+	//---------------------------
 	bool operator==(const Vector4 &rhs) const
 	{
-		return (x == rhs.x && y == rhs.y && z == rhs.z && W == rhs.W);
+		return (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w);
 	}
 	bool operator!=(const Vector4 &rhs) const
 	{
 		return !((*this) == rhs);
 	}
 
-	const Vector4 operator+()
+	Vector4 operator+()
 	{
 		return *this;
 	}
-	const Vector4 operator-()
+	Vector4 operator-()
 	{
-		return Vector4(-x, -y, -z, -W);
+		return Vector4(-x, -y, -z, -w);
 	}
-	const Vector4 &operator+=(const Vector4 &rhs)
+
+	const Vector4& operator+=(const Vector4 &rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
 		z += rhs.z;
-		W += rhs.W;
+		w += rhs.w;
 		return *this;
 	}
-	const Vector4 &operator-=(const Vector4 &rhs)
+	const Vector4& operator+=(const Vector3 &rhs)
+	{
+		x += rhs.x;
+		y += rhs.y;
+		z += rhs.z;
+		return *this;
+	}
+	const Vector4& operator-=(const Vector4 &rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
 		z -= rhs.z;
-		W -= rhs.W;
+		w -= rhs.w;
 		return *this;
 	}
-	const Vector4 &operator*=(const T &rhs)
+	const Vector4& operator-=(const Vector3 &rhs)
+	{
+		x -= rhs.x;
+		y -= rhs.y;
+		z -= rhs.z;
+		return *this;
+	}
+	const Vector4& operator*=(const T &rhs)
 	{
 		x *= rhs;
 		y *= rhs;
 		z *= rhs;
-		W *= rhs;
+		w *= rhs;
 		return *this;
 	}
-	const Vector4 &operator/=(const T &rhs)
+	const Vector4& operator/=(const T &rhs)
 	{
 		x /= rhs;
 		y /= rhs;
 		z /= rhs;
-		W *= rhs;
+		w *= rhs;
 		return *this;
 	}
+
+	friend Vector4<T> operator+(const Vector4<T> &lhs, const Vector4<T> &rhs)
+	{
+		return Vector4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
+	}
+	friend Vector4<T> operator-(const Vector4<T> &lhs, const Vector4<T> &rhs)
+	{
+		return Vector4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
+	}
+	friend Vector4<T> operator*(const T &lhs, const Vector4<T> &rhs)
+	{
+		return Vector4<T>(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w);
+	}
+	friend Vector4<T> operator*(const Vector4<T> &lhs, const T &rhs)
+	{
+		return Vector4<T>(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z, rhs * lhs.w);
+	}
+	friend Vector4<T> operator/(const Vector4<T> &lhs, const T &rhs)
+	{
+		return Vector4<T>(lhs.x / rhs, lhs.y / rhs, lhs.y / rhs, lhs.w / rhs);
+	}
 };
-template<typename T>
-const Vector4<T> operator+(const Vector4<T> &lhs, const Vector4<T> &rhs)
-{
-	return Vector4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.W + rhs.W);
-}
-template<typename T>
-const Vector4<T> operator-(const Vector4<T> &lhs, const Vector4<T> &rhs)
-{
-	return Vector4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.W - rhs.W);
-}
-template<typename T, typename U>
-const Vector4<T> operator*(const U &lhs, const Vector4<T> &rhs)
-{
-	return Vector4<T>(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.W);
-}
-template<typename T, typename U>
-const Vector4<T> operator*(const Vector4<T> &lhs, const U &rhs)
-{
-	return Vector4<T>(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z, rhs * lhs.W);
-}
-template<typename T, typename U>
-const Vector4<T> operator/(const Vector4<T> &lhs, const U &rhs)
-{
-	return Vector4<T>(lhs.x / rhs, lhs.y / rhs, lhs.y / rhs, lhs.W / rhs);
-}
+
 
 //-----------------------------------------------------------------------------------------------
 //クォータニオン
@@ -1001,17 +1186,17 @@ template<typename T>
 const Matrix4x4<T> operator*(const Vector4<T> &lhs, const Matrix4x4<T> &rhs)
 {
 	return Vector3<T>(
-			   lhs.x * rhs[0][0] + lhs.y * rhs[1][0] + lhs.z * rhs[2][0] + lhs.W * rhs[3][0],
-			   lhs.x * rhs[0][1] + lhs.y * rhs[1][1] + lhs.z * rhs[2][1] + lhs.W * rhs[3][1],
-			   lhs.x * rhs[0][2] + lhs.y * rhs[1][2] + lhs.z * rhs[2][2] + lhs.W * rhs[3][2]);
+			   lhs.x * rhs[0][0] + lhs.y * rhs[1][0] + lhs.z * rhs[2][0] + lhs.w * rhs[3][0],
+			   lhs.x * rhs[0][1] + lhs.y * rhs[1][1] + lhs.z * rhs[2][1] + lhs.w * rhs[3][1],
+			   lhs.x * rhs[0][2] + lhs.y * rhs[1][2] + lhs.z * rhs[2][2] + lhs.w * rhs[3][2]);
 }
 template<typename T>
 const Matrix4x4<T> operator*(const Matrix4x4<T> &lhs, const Vector4<T> &rhs)
 {
 	return Vector3<T>(
-			   lhs.x * rhs[0][0] + lhs.y * rhs[0][1] + lhs.z * rhs[0][2] + lhs.W * rhs[0][3],
-			   lhs.x * rhs[1][0] + lhs.y * rhs[1][1] + lhs.z * rhs[1][2] + lhs.W * rhs[1][3],
-			   lhs.x * rhs[2][0] + lhs.y * rhs[2][1] + lhs.z * rhs[2][2] + lhs.W * rhs[2][3]);
+			   lhs.x * rhs[0][0] + lhs.y * rhs[0][1] + lhs.z * rhs[0][2] + lhs.w * rhs[0][3],
+			   lhs.x * rhs[1][0] + lhs.y * rhs[1][1] + lhs.z * rhs[1][2] + lhs.w * rhs[1][3],
+			   lhs.x * rhs[2][0] + lhs.y * rhs[2][1] + lhs.z * rhs[2][2] + lhs.w * rhs[2][3]);
 }
 template<typename T>
 const Matrix4x4<T> operator*(const Matrix4x4<T> &lhs, const Matrix4x4<T> &rhs)

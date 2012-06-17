@@ -58,8 +58,8 @@ Game::Game(const tstring &title, graphic::BackBufferSize size, bool fullscreen, 
 {
 	// ウィンドウの作成
 	Size w_size =GetSize(size);
-	Window window =WindowBase::create(title, (int)w_size.x, (int)w_size.y, SIMPLE2, !fullscreen);
-	window->setTitle(title);
+	Window window =WindowBase::create(title, (int)w_size.x, (int)w_size.y, WT_SIMPLE2, !fullscreen);
+	window->setName(title);
 	setWindow(window);
 
 	// グラフィックデバイスの作成

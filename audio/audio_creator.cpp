@@ -350,7 +350,7 @@ NormalAudio::NormalAudio(const tstring &filename)
 	//XAudio用のバッファ
 	std::memset(&m_xaudio_buff, 0, sizeof(m_xaudio_buff));
 
-	m_xaudio_buff.AudioBytes = read;
+	m_xaudio_buff.AudioBytes = (UINT)read;
 	m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&m_buff[0]);
 	m_xaudio_buff.Flags		 = XAUDIO2_END_OF_STREAM;
 	m_xaudio_buff.LoopCount	 = 0;
@@ -439,7 +439,7 @@ SyncAudio::SyncAudio(const tstring &filename, int syncnum)
 	//XAudio用のバッファ
 	std::memset(&m_xaudio_buff, 0, sizeof(m_xaudio_buff));
 
-	m_xaudio_buff.AudioBytes = read;
+	m_xaudio_buff.AudioBytes = (UINT)read;
 	m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&m_buff[0]);
 	m_xaudio_buff.Flags = XAUDIO2_END_OF_STREAM;
 
@@ -576,7 +576,7 @@ StreamingAudio::StreamingAudio(const tstring &filename)
 		//とりあえず一つ入れておく
 		size_t read =m_pcm.read(&m_buff[m_UseBufNum].at(0), m_buff[m_UseBufNum].size());
 		//XAudio用のバッファ
-		m_xaudio_buff.AudioBytes = read;
+		m_xaudio_buff.AudioBytes = (UINT)read;
 		m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&m_buff[m_UseBufNum].at(0));
 		m_xaudio_buff.Flags =
 			(m_buff[m_UseBufNum].size() > read) ? XAUDIO2_END_OF_STREAM : 0;
@@ -661,7 +661,7 @@ unsigned int __stdcall StreamingAudio::StreamingThread(void *thisptr)
 			//読み出しが0でなかったらキューに追加
 			if(read != 0)
 			{
-				_this->m_xaudio_buff.AudioBytes = read;
+				_this->m_xaudio_buff.AudioBytes = (UINT)read;
 				_this->m_xaudio_buff.pAudioData = pointer_cast<BYTE>(&_this->m_buff[_this->m_UseBufNum].at(0));
 				_this->m_xaudio_buff.Flags =
 					(_this->m_buff[_this->m_UseBufNum].size() > read) ? XAUDIO2_END_OF_STREAM : 0;
@@ -835,12 +835,12 @@ IAudio CreateAudio(const tstring &filename, AudioType type, size_t value)
 	{
 		switch(type)
 		{
-		case NORMAL:
+		case AT_NORMAL:
 			return IAudio(new NormalAudio(filename));
-		case STREAMING:
+		case AT_STREAMING:
 			return IAudio(new StreamingAudio(filename));
-		case SYNCMULTI:
-			return IAudio(new SyncAudio(filename, value));
+		case AT_SYNCMULTI:
+			return IAudio(new SyncAudio(filename, (int)value));
 		default:
 			return IAudio(NULL);
 		}

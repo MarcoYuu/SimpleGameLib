@@ -5,6 +5,8 @@
 #include <graphic/graphics_device.h>
 #include <graphic/buffer_object.h>
 
+#include <other/com_release.h>
+
 // Ž©•ª‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Ì–¼‘O‹óŠÔ
 namespace yuu
 {
@@ -31,7 +33,7 @@ WriteOnlyVertexBufferObject::WriteOnlyVertexBufferObject(GraphicDevice device, s
 	IDirect3DVertexBuffer9 *buff;
 	IDirect3DDevice9* dev =(IDirect3DDevice9*)device->getHandle();
 	if(FAILED(dev->CreateVertexBuffer(
-				  size, D3DUSAGE_WRITEONLY, fvf, D3DPOOL_MANAGED, &buff, NULL)))
+				  (UINT)size, D3DUSAGE_WRITEONLY, fvf, D3DPOOL_MANAGED, &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}
@@ -51,7 +53,7 @@ VertexBuffer WriteOnlyVertexBufferObject::create(GraphicDevice device, size_t si
 size_t WriteOnlyVertexBufferObject::write(const void *data, size_t size)
 {
 	void *dest;
-	if(FAILED(param->vertex_buff->Lock(0, size, (void **)&dest, 0)))
+	if(FAILED(param->vertex_buff->Lock(0, (UINT)size, (void **)&dest, 0)))
 		return false;
 
 	memcpy(dest, data, size);
@@ -99,7 +101,7 @@ DynamicVertexBufferObject::DynamicVertexBufferObject(GraphicDevice device, size_
 	IDirect3DVertexBuffer9 *buff;
 	IDirect3DDevice9* dev =(IDirect3DDevice9*)device->getHandle();
 	if(FAILED(dev->CreateVertexBuffer(
-				  size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, fvf, D3DPOOL_DEFAULT, &buff, NULL)))
+				 (UINT)size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, fvf, D3DPOOL_DEFAULT, &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}
@@ -133,7 +135,7 @@ size_t DynamicVertexBufferObject::write(const void *data, size_t size)
 
 	// ‘‚«ž‚Ý
 	void *dest;
-	if(FAILED(param->vertex_buff->Lock(position, size, &dest, lock_flag)))
+	if(FAILED(param->vertex_buff->Lock((UINT)position, (UINT)size, &dest, lock_flag)))
 		return false;
 	memcpy(dest, data, size);
 	param->vertex_buff->Unlock();
@@ -182,7 +184,7 @@ IndexBufferObject::IndexBufferObject(GraphicDevice device, IndexFormat format, s
 	case SIZE_32BIT: d3dformat =D3DFMT_INDEX32; break;
 	}
 	if(FAILED(dev->CreateIndexBuffer(
-				  size , D3DUSAGE_WRITEONLY , d3dformat, D3DPOOL_MANAGED , &buff, NULL)))
+				  (UINT)size , D3DUSAGE_WRITEONLY , d3dformat, D3DPOOL_MANAGED , &buff, NULL)))
 	{
 		throw std::runtime_error("error");
 	}

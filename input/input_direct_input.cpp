@@ -21,6 +21,7 @@
 
 #include <input/input_direct_input.h>
 #include <other/utility.h>
+#include <other/com_release.h>
 
 // 自分のライブラリの名前空間
 namespace yuu
@@ -325,7 +326,7 @@ public:
 	// 参照カウンタ付ポインタを作成
 	// 入力を受け付けるウィンドウのハンドル
 	// 作成できなかった場合NULL
-	static KeyBoard Create(HWND hWnd);
+	static KeyBoard create(HWND hWnd);
 
 	void update();
 	bool getKeyState(KeyboardButton key, ButtonState get_type);
@@ -361,7 +362,7 @@ DirectInputKeyBoard::~DirectInputKeyBoard(void)
 
 	SafeRelease(m_pKeyBoardDev);
 }
-KeyBoard DirectInputKeyBoard::Create(HWND hWnd)
+KeyBoard DirectInputKeyBoard::create(HWND hWnd)
 {
 	KeyBoard key;
 	try
@@ -471,7 +472,7 @@ public:
 	// 参照カウンタ付ポインタを作成
 	// 入力を受け付けるウィンドウのハンドル
 	// 作成できなかった場合NULL
-	static GamePad Create(HWND hWnd);
+	static GamePad create(HWND hWnd);
 
 	void update();
 	bool getButtonState(GamepadButton button, ButtonState get_type = PRESENT);
@@ -515,7 +516,7 @@ DirectInputGamePad::~DirectInputGamePad()
 
 	SafeRelease(m_pGamePad);
 }
-GamePad DirectInputGamePad::Create(HWND hWnd)
+GamePad DirectInputGamePad::create(HWND hWnd)
 {
 	GamePad pad;
 	try
@@ -694,7 +695,7 @@ public:
 	// 参照カウンタ付ポインタを作成
 	// 入力を受け付けるウィンドウのハンドル
 	// 作成できなかった場合NULL
-	static PointingDevice Create(HWND hWnd);
+	static PointingDevice create(HWND hWnd);
 
 	void update();
 	bool getButtonState(MouseButton button, ButtonState get_type = PRESENT);
@@ -730,7 +731,7 @@ DirectInputMouse::~DirectInputMouse()
 		m_pMouse->Unacquire();
 	SafeRelease(m_pMouse);
 }
-PointingDevice DirectInputMouse::Create(HWND hWnd)
+PointingDevice DirectInputMouse::create(HWND hWnd)
 {
 	PointingDevice mouse;
 	try
@@ -798,9 +799,9 @@ Controller CreateDirectInputController(app::Window window)
 		DirectInputDevice::instance().init();
 		Controller result = Controller(
 			DirectInputController::create(
-			DirectInputKeyBoard::Create(window->getHandle()),
-			DirectInputGamePad::Create(window->getHandle()),
-			DirectInputMouse::Create(window->getHandle()))
+			DirectInputKeyBoard::create((HWND)window->getHandle()),
+			DirectInputGamePad::create((HWND)window->getHandle()),
+			DirectInputMouse::create((HWND)window->getHandle()))
 			);
 		return result;
 	}catch(...){
