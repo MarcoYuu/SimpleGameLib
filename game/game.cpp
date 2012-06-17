@@ -16,31 +16,31 @@ using namespace graphic;
 //-----------------------------------------------------------------------------------------------
 // ÉQÅ[ÉÄïîïi
 //-----------------------------------------------------------------------------------------------
-GraphicDevice IGameComponent::getGraphicDevice() const
+GraphicDevice GameComponentBase::getGraphicDevice() const
 {
 	return m_device;
 }
-Controller IGameComponent::getController() const
+Controller GameComponentBase::getController() const
 {
 	return m_controller;
 }
-const Game& IGameComponent::getGame() const{
+const Game& GameComponentBase::getGame() const{
 	return *m_game;
 }
 
-void IGameComponent::initialize( const Game &game )
+void GameComponentBase::initialize( const Game &game )
 {
 	m_game =&game;
 	m_device =game.getGraphicDevice();
 	m_controller =game.getController();
 }
 
-void IGameComponent::setPriority( int p )
+void GameComponentBase::setPriority( int p )
 {
 	m_priority =p;
 }
 
-bool IGameComponent::operator<( const IGameComponent& rhs ) const
+bool GameComponentBase::operator<( const GameComponentBase& rhs ) const
 {
 	return m_priority<rhs.m_priority;
 }

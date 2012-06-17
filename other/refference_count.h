@@ -13,14 +13,14 @@ namespace yuu
 // 継承することで自動削除のポインタが使用できる
 //
 template<class Derived>
-class IRefferenceCount
+class RefferenceCount
 {
 private:
 	size_t m_ref_count;
 
 public:
 	// コンストラクタ
-	IRefferenceCount()
+	RefferenceCount()
 		: m_ref_count(0)
 	{}
 

@@ -14,6 +14,8 @@
 #define TO_DEGREES(rad) (180.0*rad/M_PI)
 #endif
 
+namespace yuu{
+
 template<typename T> class Vector2;
 template<typename T> class Vector3;
 template<typename T> class Vector4;
@@ -1208,4 +1210,6 @@ template<typename T>
 const Matrix4x4<T> operator/(const Matrix4x4<T> &lhs, const T &rhs)
 {
 	return Matrix4x4<T>(lhs) /= rhs;
+}
+
 }

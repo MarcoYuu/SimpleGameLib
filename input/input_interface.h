@@ -26,14 +26,23 @@ typedef boost::intrusive_ptr<IPointingDeviceInput> PointingDevice;
 //-----------------------------------------------------------------------------------
 //ボタン列挙子
 //-----------------------------------------------------------------------------------
+//
 // ボタンの取得方法
+//
 enum ButtonState
 {
-	PRESENT,	// <現在の状態を取得する
-	JUST_DOWN,	// <押された直後かを取得する
-	JUST_UP// <離された直後かを取得する
+	PRESENT,	// 現在の状態を取得する
+	JUST_DOWN,	// 押された直後かを取得する
+	JUST_UP		// 離された直後かを取得する
 };
+
+//-----------------------------------------------------------------------------------
+// 
 // コントローラーのボタン
+// あるボタンに対し入力割り当てない設定をする場合
+// BUTTON_NONEを各入力デバイスの列挙型にキャストして
+// 渡さなければならない
+// 
 enum ControllerButton
 {
 	CB_BUTTON_0,
@@ -59,7 +68,10 @@ enum ControllerButton
 	CB_BUTTON_NUM,
 	BUTTON_NONE = 0xffffffff
 };
+//-----------------------------------------------------------------------------------
+//
 // キーボードのボタン
+// 
 enum KeyboardButton
 {
 	KB_BUTTON_A,
@@ -108,7 +120,10 @@ enum KeyboardButton
 	KB_BUTTON_0,
 	KB_BUTTON_NUM
 };
+//-----------------------------------------------------------------------------------
+//
 // マウスのボタン
+// 
 enum MouseButton
 {
 	MB_BUTTON_0,
@@ -117,7 +132,10 @@ enum MouseButton
 	MB_BUTTON_3,
 	MB_BUTTON_NUM
 };
+//-----------------------------------------------------------------------------------
+//
 // ゲームパッドのボタン
+// 
 enum GamepadButton
 {
 	GB_BUTTON_0,
@@ -170,7 +188,7 @@ enum GamepadButton
 // 仮想的なゲームコントローラクラス
 //
 class IController
-	: public yuu::IRefferenceCount<IController>
+	: public yuu::RefferenceCount<IController>
 	, boost::noncopyable
 {
 public:
@@ -245,7 +263,7 @@ public:
 // 仮想的なキーボードクラス
 //
 class IKeyBoardInput
-	: public yuu::IRefferenceCount<IKeyBoardInput>
+	: public yuu::RefferenceCount<IKeyBoardInput>
 	, boost::noncopyable
 {
 public:
@@ -270,7 +288,7 @@ public:
 // 仮想的なゲームパッドクラス
 //
 class IGamePadInput
-	: public yuu::IRefferenceCount<IGamePadInput>
+	: public yuu::RefferenceCount<IGamePadInput>
 	, boost::noncopyable
 {
 public:
@@ -308,7 +326,7 @@ public:
 // 仮想的なポインティングデバイスクラス
 //
 class IPointingDeviceInput
-	: public yuu::IRefferenceCount<IPointingDeviceInput>
+	: public yuu::RefferenceCount<IPointingDeviceInput>
 	, boost::noncopyable
 {
 public:

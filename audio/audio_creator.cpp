@@ -118,7 +118,7 @@ public:
 //--------------------------------------------------------------------------------------
 //オーディオのベース
 //--------------------------------------------------------------------------------------
-class IXAudio2Base : public IAudioBase
+class XAudio2Base : public IAudio
 {
 	typedef std::vector<IXAudio2SourceVoice *> SourseVoiseList;
 protected:
@@ -131,13 +131,13 @@ protected:
 	// 生成、代入とコピー禁止
 	// コンストラクタ
 	// ソースボイスの個数
-	IXAudio2Base(size_t voice_num = 1)
+	XAudio2Base(size_t voice_num = 1)
 		: m_pcm()
 		, m_src_voice_list(voice_num, 0)
 	{}
 
 public:
-	virtual ~IXAudio2Base() {}
+	virtual ~XAudio2Base() {}
 	virtual void stop() {};
 };
 
@@ -148,12 +148,12 @@ public:
 //
 // すべて読み込み再生する。
 //
-class NormalAudio : public IXAudio2Base
+class NormalAudio : public XAudio2Base
 {
-	typedef IXAudio2Base base;
+	typedef XAudio2Base base;
 
 	// 生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
+	friend Audio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	std::vector<char> m_buff;	// <バッファ
@@ -182,12 +182,12 @@ public:
 //
 // すべて読み込み再生する。指定個数だけ同時再生できる。
 //
-class SyncAudio : public IXAudio2Base
+class SyncAudio : public XAudio2Base
 {
-	typedef IXAudio2Base Super;
+	typedef XAudio2Base Super;
 
 	//生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
+	friend Audio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	//バッファ
@@ -221,12 +221,12 @@ public:
 //
 // ストリーミング再生する。
 //
-class StreamingAudio : public IXAudio2Base
+class StreamingAudio : public XAudio2Base
 {
-	typedef IXAudio2Base Super;
+	typedef XAudio2Base Super;
 
 	//生成関数にはアクセス許可
-	friend IAudio CreateAudio(const tstring &, AudioType, size_t);
+	friend Audio CreateAudio(const tstring &, AudioType, size_t);
 
 private:
 	//ストリーミングスレッド関数とハンドル
@@ -281,10 +281,10 @@ public:
 // 音量の増減はごく単純な線形補完。
 //
 class FadeHelper
-	: public IRefferenceCount<FadeHelper>, boost::noncopyable
+	: public RefferenceCount<FadeHelper>, boost::noncopyable
 {
 private:
-	IAudio m_audio;
+	Audio m_audio;
 
 	float m_volume;
 	float m_const;
@@ -303,13 +303,13 @@ public:
 	// コンストラクタ
 	// フェードさせたいオーディオ
 	// std::runtime_error("失敗理由")
-	FadeHelper(IAudio audio);
+	FadeHelper(Audio audio);
 	// デストラクタ
 	~FadeHelper();
 
 	// 管理しているオーディオを取得
 	// なし
-	IAudio GetManagedAudio();
+	Audio GetManagedAudio();
 
 	// フェードイン開始
 	// フェードイン完了までの秒数。ただし厳密にこの時間では終了しない。
@@ -765,7 +765,7 @@ unsigned int __stdcall FadeHelper::FadeThread(void *thisptr)
 	return 0;
 }
 
-FadeHelper::FadeHelper(IAudio audio)
+FadeHelper::FadeHelper(Audio audio)
 	: m_audio(audio),
 	  m_volume(0),
 	  m_const(0),
@@ -792,7 +792,7 @@ FadeHelper::~FadeHelper()
 	CloseHandle(m_hFadeThread);
 }
 
-IAudio FadeHelper::GetManagedAudio()
+Audio FadeHelper::GetManagedAudio()
 {
 	return m_audio;
 }
@@ -826,7 +826,7 @@ void InitAudio()
 	XAudioEngine::getInstance().init();
 }
 
-IAudio CreateAudio(const tstring &filename, AudioType type, size_t value)
+Audio CreateAudio(const tstring &filename, AudioType type, size_t value)
 {
 	//初期化がすでに行われている
 	assert(XAudioEngine::getInstance().isInitialized());
@@ -836,18 +836,18 @@ IAudio CreateAudio(const tstring &filename, AudioType type, size_t value)
 		switch(type)
 		{
 		case AT_NORMAL:
-			return IAudio(new NormalAudio(filename));
+			return Audio(new NormalAudio(filename));
 		case AT_STREAMING:
-			return IAudio(new StreamingAudio(filename));
+			return Audio(new StreamingAudio(filename));
 		case AT_SYNCMULTI:
-			return IAudio(new SyncAudio(filename, (int)value));
+			return Audio(new SyncAudio(filename, (int)value));
 		default:
-			return IAudio(NULL);
+			return Audio(NULL);
 		}
 	}
 	catch(...)
 	{
-		return IAudio(NULL);
+		return Audio(NULL);
 	}
 }
 }

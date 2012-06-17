@@ -24,7 +24,7 @@ enum TextureFormat{
 //	通常テクスチャ
 //--------------------------------------------------------------------------------------------------
 class TextureManager
-	: public IRefferenceCount<TextureManager>
+	: public RefferenceCount<TextureManager>
 	, boost::noncopyable
 {
 public:

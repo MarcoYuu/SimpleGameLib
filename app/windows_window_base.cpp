@@ -107,24 +107,28 @@ bool WindowBase::initWindowInstance(WindowType style, bool consider_frame)
 
 	//ウィンドウを作成
 	param->hWnd = CreateWindow(
-				 param->name.c_str(),
-				 param->title.c_str(),
-				 win_style,				//ウィンドウの種類
-				 CW_USEDEFAULT,			//Ｘ座標
-				 CW_USEDEFAULT,			//Ｙ座標
-				 param->width,				//幅
-				 param->height,				//高さ
-				 NULL,					//親ウィンドウのハンドル、親を作るときはNULL
-				 NULL,					//メニューハンドル、クラスメニューを使うときはNULL
-				 ::GetModuleHandle(0),	//インスタンスハンドル
-				 NULL
-			 );
+		param->name.c_str(),
+		param->title.c_str(),
+		win_style,				//ウィンドウの種類
+		CW_USEDEFAULT,			//Ｘ座標
+		CW_USEDEFAULT,			//Ｙ座標
+		param->width,			//幅
+		param->height,			//高さ
+		NULL,					//親ウィンドウのハンドル、親を作るときはNULL
+		NULL,					//メニューハンドル、クラスメニューを使うときはNULL
+		::GetModuleHandle(0),	//インスタンスハンドル
+		NULL
+	);
 
 	//ウィンドウハンドルを取得できなかったらfalse
 	if(!param->hWnd)
 		return false;
 
 	return true;
+}
+void WindowBase::destroy()
+{
+	::DestroyWindow(param->hWnd);
 }
 void WindowBase::show(bool bShow)
 {
@@ -136,10 +140,26 @@ void WindowBase::show(bool bShow)
 	else
 		::ShowWindow(param->hWnd, SW_HIDE);
 }
-void WindowBase::destroy()
+int WindowBase::getWidth() const
 {
-	::DestroyWindow(param->hWnd);
+	return param->width;
 }
+
+int WindowBase::getHeight() const
+{
+	return param->height;
+}
+
+void* WindowBase::getHandle() const
+{
+	return param->hWnd;
+}
+
+const tstring& WindowBase::getName() const
+{
+	return param->name;
+}
+
 void WindowBase::setSize(int x, int y, int Width, int Height)
 {
 	param->width = Width;
@@ -153,6 +173,27 @@ void WindowBase::setName(tstring title)
 	param->title = title;
 	SetWindowText(param->hWnd, title.c_str());
 }
+bool WindowBase::isActive()
+{
+	return param->hWnd == ::GetActiveWindow();
+}
+
+void WindowBase::showCursor(bool show)
+{
+	::ShowCursor(show ? TRUE : FALSE);
+}
+
+void WindowBase::setHandle( void* handle )
+{
+	param->hWnd =(HWND)handle;
+}
+
+LRESULT WindowBase::callbackProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	//この関数をオーバーロードしプロシージャを変更可能
+	return ::DefWindowProc(hWnd, msg, wp, lp);
+}
+
 LRESULT CALLBACK WindowBase::procedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	//プロパティを参照し自身のポインタを取得
@@ -178,46 +219,5 @@ LRESULT CALLBACK WindowBase::procedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp
 	//実際の動作をするプロシージャを呼び出し
 	return pWindow->callbackProcedure(hWnd, msg, wp, lp);
 }
-LRESULT WindowBase::callbackProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	//この関数をオーバーロードしプロシージャを変更可能
-	return ::DefWindowProc(hWnd, msg, wp, lp);
-}
-
-int WindowBase::getWidth() const
-{
-	return param->width;
-}
-
-int WindowBase::getHeight() const
-{
-	return param->height;
-}
-
-void* WindowBase::getHandle() const
-{
-	return param->hWnd;
-}
-
-bool WindowBase::isActive()
-{
-	return param->hWnd == ::GetActiveWindow();
-}
-
-void WindowBase::showCursor(bool show)
-{
-	::ShowCursor(show ? TRUE : FALSE);
-}
-
-const tstring& WindowBase::getName() const
-{
-	return param->name;
-}
-
-void WindowBase::setHandle( void* handle )
-{
-	param->hWnd =(HWND)handle;
-}
-
 }
 }

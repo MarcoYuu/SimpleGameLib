@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <cmath>
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
@@ -12,36 +11,38 @@
 namespace yuu{
 namespace game{
 
-class IScene;
+class SceneBase;
 class SceneManagerComponent;
-typedef boost::intrusive_ptr<IScene> Scene;
+typedef boost::intrusive_ptr<SceneBase> Scene;
 typedef boost::intrusive_ptr<SceneManagerComponent> SceneManager;
 
 //-----------------------------------------------------------------------------------------------
 // シーンマネージャ
 //-----------------------------------------------------------------------------------------------
-class SceneManagerComponent :public IGameComponent, boost::noncopyable
+class SceneManagerComponent :public GameComponentBase, boost::noncopyable
 {
 public:
-	SceneManagerComponent();
-	~SceneManagerComponent();
 	static SceneManager create();
+	~SceneManagerComponent();
 
 	void addScene(Scene scene);
 	void update(float time);
 	void draw(float time);
 	void removeScene( Scene scene );
-	void removeScene( IScene *scene );
+	void removeScene( SceneBase *scene );
 	size_t getSceneNum() const;
 
 private:
 	typedef std::list<Scene> SceneList;
 	SceneList m_scene;
+	
+	SceneManagerComponent();
 };
 
 //-----------------------------------------------------------------------------------------------
 // ゲームシーン
 //-----------------------------------------------------------------------------------------------
+//
 // アクティブ：
 // 　　シーンスタックの一番上にいてかつフォーカスを得ている状態です
 // 　　フォーカスを得ることができないとき、getState()はACTIVEをかえす
@@ -50,6 +51,7 @@ private:
 // 　　シーンスタックで二番目以降のシーンの状態です
 // 　　この状態では描画・更新ともに基本的には行われませんが
 // 　　トップのシーンがPopup状態の時、その下のシーンは描画のみ行われます
+// 
 enum SceneState{
 	TRANSITION_ON,	// シーンがアクティブになっている途中です		getState()!= 0,1 減少中
 	TRANSITION_OFF,	// シーンが非アクティブになっている途中です	getState()!= 0,1 上昇中
@@ -57,10 +59,10 @@ enum SceneState{
 	HIDDEN			// シーンは完全に非アクティブです				getState()!= 1 
 };
 
-class IScene :public IRefferenceCount<IScene>, boost::noncopyable
+class SceneBase :public RefferenceCount<SceneBase>, boost::noncopyable
 {
 public:
-	virtual ~IScene(){}
+	virtual ~SceneBase(){}
 
 	bool isPopup() const;
 	bool isExitting() const;
@@ -91,7 +93,7 @@ public:
 	void exit();
 
 protected:
-	IScene(SceneManagerComponent &manager);
+	SceneBase(SceneManagerComponent &manager);
 	SceneManagerComponent& getSceneManager() const; 
 
 	void setIsPopup(bool flag);

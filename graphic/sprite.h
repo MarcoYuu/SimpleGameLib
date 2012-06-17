@@ -114,7 +114,7 @@ technique ParameterVertex
 
 #endif
 
-const BYTE g_main[] =
+const BYTE sprite_shader[] =
 {
 	1,   9, 255, 254, 164,   1,
 	0,   0,   0,   0,   0,   0,

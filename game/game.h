@@ -26,11 +26,11 @@ using namespace graphic;
 // コンポーネントとして追加されるまではメソッドの有効性は保証されない
 // 
 class Game;
-class IGameComponent : public IRefferenceCount<IGameComponent>
+class GameComponentBase : public RefferenceCount<GameComponentBase>
 {
 	friend class Game;
 public:
-	virtual ~IGameComponent(){}
+	virtual ~GameComponentBase(){}
 
 	GraphicDevice getGraphicDevice() const;
 	Controller getController() const;
@@ -49,9 +49,9 @@ private:
 	Controller m_controller;
 
 	int m_priority;
-	bool operator<(const IGameComponent& rhs) const;
+	bool operator<(const GameComponentBase& rhs) const;
 };
-typedef boost::intrusive_ptr<IGameComponent> GameComponent;
+typedef boost::intrusive_ptr<GameComponentBase> GameComponent;
 
 //-----------------------------------------------------------------------------------------------
 // ゲームクラス

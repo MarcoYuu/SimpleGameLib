@@ -9,6 +9,8 @@
 
 #include <other/timer.h>
 
+namespace yuu{
+
 //-----------------------------------------------------------------------------------------------
 //clock()関数を用いた時間計測クラス
 //-----------------------------------------------------------------------------------------------
@@ -57,4 +59,6 @@ bool ClockFreqCounter::isAvailable()
 {
 	LARGE_INTEGER tmp;
 	return ((QueryPerformanceCounter(&tmp) == 0) ? false : true);
+}
+
 }

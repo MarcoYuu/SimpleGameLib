@@ -94,7 +94,7 @@ private:
 //-----------------------------------------------------------------------------------------------
 // ゲームシーンテスト
 //-----------------------------------------------------------------------------------------------
-class TestScene : public IScene{
+class TestScene : public SceneBase{
 public:
 	TestScene(SceneManagerComponent &manager);
 	static Scene create(SceneManagerComponent &manager);
@@ -104,7 +104,7 @@ public:
 	void draw(float time);
 
 private:
-	typedef IScene base;
+	typedef SceneBase base;
 
 	SpriteBatch batch;
 	Texture tex[2];

@@ -16,7 +16,7 @@ namespace graphic
 // スプライトバッチ
 //--------------------------------------------------------------------------------------------------
 class SpriteBatchSystem
-	: public IRefferenceCount<SpriteBatchSystem>
+	: public RefferenceCount<SpriteBatchSystem>
 	, boost::noncopyable
 {
 public:

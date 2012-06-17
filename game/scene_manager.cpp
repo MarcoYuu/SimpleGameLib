@@ -7,7 +7,7 @@ namespace game{
 //-----------------------------------------------------------------------------------------------
 // ゲームシーン
 //-----------------------------------------------------------------------------------------------
-IScene::IScene( SceneManagerComponent &manager ) 
+SceneBase::SceneBase( SceneManagerComponent &manager ) 
 	: m_is_popup(false)
 	, m_is_exitting(false)
 	, m_have_focus(false)
@@ -18,68 +18,68 @@ IScene::IScene( SceneManagerComponent &manager )
 	, m_manager(manager)
 {}
 
-bool IScene::isPopup() const
+bool SceneBase::isPopup() const
 {
 	return m_is_popup;
 }
 
-bool IScene::isExitting() const
+bool SceneBase::isExitting() const
 {
 	return m_is_exitting;
 }
 
-bool IScene::isActive() const
+bool SceneBase::isActive() const
 {
 	return m_have_focus && (m_state==TRANSITION_ON||m_state==ACTIVE);
 }
 
-bool IScene::hasFocus() const
+bool SceneBase::hasFocus() const
 {
 	return m_have_focus;
 }
 
-yuu::game::SceneState IScene::getState() const
+yuu::game::SceneState SceneBase::getState() const
 {
 	return m_state;
 }
 
-yuu::graphic::GraphicDevice IScene::getGraphicDevice() const
+yuu::graphic::GraphicDevice SceneBase::getGraphicDevice() const
 {
 	return m_manager.getGraphicDevice();
 }
 
-yuu::input::Controller IScene::getController() const
+yuu::input::Controller SceneBase::getController() const
 {
 	return m_manager.getController();
 }
 
-SceneManagerComponent& IScene::getSceneManager() const
+SceneManagerComponent& SceneBase::getSceneManager() const
 {
 	return m_manager;
 }
 
-double IScene::getTransitionState() const
+double SceneBase::getTransitionState() const
 {
 	return m_transition_state;
 }
 
-void IScene::setIsPopup( bool flag )
+void SceneBase::setIsPopup( bool flag )
 {
 	m_is_popup =flag;
 }
 
-void IScene::setTransitionOnTime( double time )
+void SceneBase::setTransitionOnTime( double time )
 {
 	m_transition_on_time =time;
 }
 
-void IScene::setTransitionOffTime( double time )
+void SceneBase::setTransitionOffTime( double time )
 {
 	m_transition_off_time =time;
 }
 
 
-void IScene::update( float time , bool other_has_focus, bool covered_by_other )
+void SceneBase::update( float time , bool other_has_focus, bool covered_by_other )
 {
 	// フォーカスの更新
 	this->m_have_focus = !other_has_focus;
@@ -111,7 +111,7 @@ void IScene::update( float time , bool other_has_focus, bool covered_by_other )
 	}
 }
 
-bool IScene::updateTransition( float time, double transition_time, int direction )
+bool SceneBase::updateTransition( float time, double transition_time, int direction )
 {
 	double transition_delta;
 
@@ -139,7 +139,7 @@ bool IScene::updateTransition( float time, double transition_time, int direction
 }
 
 
-void IScene::exit()
+void SceneBase::exit()
 {
 	// 終了までの猶予があるときはexittingをtrueにしておくだけ
 	if (m_transition_off_time == 0)
@@ -152,7 +152,7 @@ void IScene::exit()
 // シーンマネージャ
 //-----------------------------------------------------------------------------------------------
 SceneManagerComponent::SceneManagerComponent() 
-	:IGameComponent()
+	:GameComponentBase()
 {
 }
 
@@ -223,7 +223,7 @@ void SceneManagerComponent::removeScene( Scene scene )
 	m_scene.remove_if([scene](Scene s){return s==scene;});
 }
 
-void SceneManagerComponent::removeScene( IScene *scene )
+void SceneManagerComponent::removeScene( SceneBase *scene )
 {
 	m_scene.remove_if([scene](Scene s){return s==scene;});
 }

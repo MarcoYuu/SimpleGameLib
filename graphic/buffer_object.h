@@ -14,12 +14,12 @@ namespace graphic
 //--------------------------------------------------------------------------------------------------
 // バッファ
 //--------------------------------------------------------------------------------------------------
-class BufferObject
-	: public IRefferenceCount<BufferObject>
+class IBufferObject
+	: public RefferenceCount<IBufferObject>
 	, boost::noncopyable
 {
 public:
-	virtual ~BufferObject(){}
+	virtual ~IBufferObject(){}
 
 	// 書き込み
 	virtual size_t write(const void *data, size_t size) = 0;
@@ -31,7 +31,7 @@ public:
 };
 
 // 頂点バッファ
-class VertexBufferObject: public BufferObject{
+class VertexBufferObject: public IBufferObject{
 public:
 	virtual ~VertexBufferObject(){}
 };
@@ -85,7 +85,7 @@ private:
 //--------------------------------------------------------------------------------------------------
 // インデックスバッファ
 //--------------------------------------------------------------------------------------------------
-class IndexBufferObject: public BufferObject
+class IndexBufferObject: public IBufferObject
 {
 public:
 	enum IndexFormat{ SIZE_16BIT, SIZE_32BIT };

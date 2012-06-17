@@ -231,7 +231,7 @@ void SpriteBatchSystem::createEffect()
 	LPD3DXBUFFER error = NULL;
 
 	D3DXCreateEffect(
-		dev, g_main, sizeof(g_main), NULL, NULL,
+		dev, sprite_shader, sizeof(sprite_shader), NULL, NULL,
 		D3DXSHADER_SKIPVALIDATION, NULL, &effect, &error);
 
 	param->effect = effect;

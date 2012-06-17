@@ -10,7 +10,7 @@ namespace graphic
 {
 
 class GraphicDeviceManager;
-class BufferObject;
+class IBufferObject;
 class VertexBufferObject;
 class WriteOnlyVertexBufferObject;
 class DynamicVertexBufferObject;
@@ -22,7 +22,7 @@ class WritableTextureManager;
 class RenderTargetManager;
 
 typedef boost::intrusive_ptr<GraphicDeviceManager>			GraphicDevice;
-typedef boost::intrusive_ptr<BufferObject>					Buffer;
+typedef boost::intrusive_ptr<IBufferObject>					Buffer;
 typedef boost::intrusive_ptr<VertexBufferObject>			VertexBuffer;
 typedef boost::intrusive_ptr<WriteOnlyVertexBufferObject>	WriteOnlyVertexBuffer;
 typedef boost::intrusive_ptr<DynamicVertexBufferObject>		DynamicVertexBuffer;

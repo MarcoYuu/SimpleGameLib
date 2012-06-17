@@ -18,16 +18,9 @@ namespace yuu
 // オーディオ
 namespace audio
 {
-//--------------------------------------------------------------------------------------
-//
-//
-//オーデイオクラス
-//
-//
-//--------------------------------------------------------------------------------------
 
-class IAudioBase;
-typedef boost::intrusive_ptr<IAudioBase> IAudio;
+class IAudio;
+typedef boost::intrusive_ptr<IAudio> Audio;
 
 //--------------------------------------------------------------------------------------
 //オーディオ関連関数群
@@ -38,18 +31,9 @@ typedef boost::intrusive_ptr<IAudioBase> IAudio;
 // 
 void InitAudio();
 
-//
-// オーディオのタイプ
-//
-enum AudioType
-{
-	AT_NORMAL,		// 単一の音をすべて読み込み再生します。初期状態はループしません。 valueは無視されます。
-	AT_STREAMING,	// 単一の音をストリーミングしつつ再生します。初期状態はループします。valueは無視されます。
-	AT_SYNCMULTI,	// 単一の音を複数同時の再生します。ループ不可。valueは同時再生数です。
-};
-
-//
+//--------------------------------------------------------------------------------------
 // オーディオの作成
+//--------------------------------------------------------------------------------------
 //
 // 指定したファイルを指定した形式で再生する再生機を作成します。
 // 再生したいオーディオの個数だけ作成します。
@@ -57,17 +41,23 @@ enum AudioType
 // 指定ファイルが見つからないか、再生インタフェースの作成に失敗したとき
 // この関数は失敗し、その場合はIAudioにヌルポインタを返します。
 // 
-IAudio CreateAudio(const tstring &filename, AudioType type, size_t value = 1);
+enum AudioType
+{
+	AT_NORMAL,		// 単一の音をすべて読み込み再生します。初期状態はループしません。 valueは無視されます。
+	AT_STREAMING,	// 単一の音をストリーミングしつつ再生します。初期状態はループします。valueは無視されます。
+	AT_SYNCMULTI,	// 単一の音を複数同時の再生します。ループ不可。valueは同時再生数です。
+};
+Audio CreateAudio(const tstring &filename, AudioType type, size_t value = 1);
 
 //--------------------------------------------------------------------------------------
 //オーディオのインタフェース
 //--------------------------------------------------------------------------------------
-class IAudioBase
-	: public IRefferenceCount<IAudioBase>
+class IAudio
+	: public RefferenceCount<IAudio>
 	, boost::noncopyable
 {
 public:
-	virtual ~IAudioBase() {}
+	virtual ~IAudio() {}
 
 	// 再生開始
 	// なし

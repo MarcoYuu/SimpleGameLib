@@ -38,7 +38,7 @@ enum WindowType
 
 // ウィンドウ基礎クラス
 class WindowBase
-	: public IRefferenceCount<WindowBase>
+	: public RefferenceCount<WindowBase>
 	, boost::noncopyable
 {
 public:
@@ -65,10 +65,10 @@ public:
 	// ウィンドウ名の取得
 	const tstring& getName() const;
 
-	bool isActive();
 	void setSize(int x, int y, int width, int height);
 	void setName(tstring title);
 
+	bool isActive();
 	void showCursor(bool show);
 
 protected:
@@ -90,6 +90,7 @@ private:
 	WindowBase(tstring name, int width, int height, WindowType style, bool consider_frame);
 
 #if defined(_WIN32) | defined(_WIN64)
+	// ウィンドウプロシージャ用のグローバル関数
 	static LRESULT CALLBACK procedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 #endif	
 };

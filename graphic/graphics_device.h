@@ -75,7 +75,7 @@ enum ClearTarget{
 };
 
 class GraphicDeviceManager
-	: public IRefferenceCount<GraphicDeviceManager>
+	: public RefferenceCount<GraphicDeviceManager>
 	, boost::noncopyable
 {
 public:
