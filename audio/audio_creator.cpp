@@ -12,14 +12,15 @@
 
 #include <fstream>
 #include <vector>
+#include <memory>
 #include <stdexcept>
 
 #include <process.h>
 #include <xaudio2.h>
 
-#include <audio/audio_creator.h>
-#include <audio/pcm_reader.h>
-#include <audio/mta_coinitiarizer.h>
+#include "../audio/audio_creator.h"
+#include "../audio/pcm_reader.h"
+#include "../audio/mta_coinitiarizer.h"
 
 // Ž©•ª‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Ì–¼‘O‹óŠÔ
 namespace yuu

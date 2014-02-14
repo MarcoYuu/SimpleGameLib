@@ -1,7 +1,7 @@
-#include "TestClass.h"
-
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
+
+#include "TestClass.h"
 
 //-----------------------------------------------------------------------------------------------
 // ゲームクラステスト
@@ -24,7 +24,7 @@ void TestClass::initializeResources()
 	addComponent(manager);
 
 	manager->addScene(Scene(new TestScene(*manager)));
-	
+
 	counter.setAverageNum(30);
 }
 
@@ -39,6 +39,11 @@ void TestClass::draw(float time)
 
 	//バッファクリア
 	device->clear(RENDER_Z, Color((byte)80, 5, 46));
+	//yuu::graphic::Rectangle rest[] ={
+	//	yuu::graphic::Rectangle(0, 0, 100, 100),
+	//	yuu::graphic::Rectangle(300, 300, 500, 500)
+	//};
+	//device->clear(RENDER_Z, Color((byte)80, 5, 46), rest, 2);
 }
 
 void TestClass::update(float time)
@@ -73,9 +78,10 @@ TestScene::TestScene( SceneManagerComponent &manager )
 	, object(getGraphicDevice())
 {
 	batch  = SpriteBatchSystem::create(getGraphicDevice(), 30);
-	tex[0] = TextureManager::create(getGraphicDevice(), _T("white.bmp"));
-	tex[1] = TextureManager::create(getGraphicDevice(), _T("test.png"));
-	
+	tex = TextureManager::create(getGraphicDevice(), _T("test.png"));
+	w_tex = WritableTextureManager::create(getGraphicDevice(), 1, 1, TextureFormat::ARGB_8888);
+	w_tex->write(&Color::White, 1, 1, 32);
+
 	this->setTransitionOffTime(0.8);
 	this->setTransitionOnTime(0.8);
 }
@@ -121,7 +127,7 @@ void TestScene::draw( float time )
 	if(!isFade())
 	{
 		//スプライト描画開始
-		batch->setTexture(tex[1]);
+		batch->setTexture(tex);
 		batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
 		batch->begin();
 		{
@@ -159,32 +165,32 @@ void TestScene::fade()
 	switch(getState())
 	{
 	case TRANSITION_OFF:
-	{
-		batch->setTexture(tex[0]);
-		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
-		Size win_size =getGraphicDevice()->getBackBufferSize();
-		double alpha =getTransitionState();
-		batch->begin();
-		batch->draw(
-			Point2f(win_size.x/2.0f, win_size.y/2.0f), 
-			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
-			(float)win_size.x, 0.0f);
-		batch->end();			
-	}break;
+		{
+			batch->setTexture(w_tex);
+			batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
+			Size win_size =getGraphicDevice()->getBackBufferSize();
+			double alpha =getTransitionState();
+			batch->begin();
+			batch->draw(
+				Point2f(win_size.x/2.0f, win_size.y/2.0f), 
+				Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
+				(float)win_size.x, 0.0f);
+			batch->end();			
+		}break;
 
 	case TRANSITION_ON:
-	{
-		batch->setTexture(tex[0]);
-		batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
-		Size win_size =getGraphicDevice()->getBackBufferSize();
-		double alpha =1-getTransitionState();
-		batch->begin();
-		batch->draw(
-			Point2f(win_size.x/2.0f, win_size.y/2.0f), 
-			Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
-			(float)win_size.x, 0);
-		batch->end();
-	}break;
+		{
+			batch->setTexture(w_tex);
+			batch->blendMode(SpriteBatchSystem::BLEND_DEFAULT);
+			Size win_size =getGraphicDevice()->getBackBufferSize();
+			double alpha =1-getTransitionState();
+			batch->begin();
+			batch->draw(
+				Point2f(win_size.x/2.0f, win_size.y/2.0f), 
+				Color((byte)0,(byte)0,(byte)0,(byte)(255*(-(alpha*2-1)*(alpha*2-1)+1))), 
+				(float)win_size.x, 0);
+			batch->end();
+		}break;
 	}
 }
 
@@ -235,17 +241,11 @@ void TestObject::update( Controller controller )
 			b!=NULL?b->init(position, vel, vel*0.01f):0;
 			b =bullets.construct<Bullet>(this);
 			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
-
-			vel.set(bulletBaseVel*cos(-rot-i*(float)M_PI/4),bulletBaseVel*sin(-rot-i*(float)M_PI/4));
-			vel *=ratio;
-			b =bullets.construct<Bullet>(this);
-			b!=NULL?b->init(position, vel, vel*0.01f):0;
-			b =bullets.construct<Bullet>(this);
-			b!=NULL?b->init(position, -vel, -vel*0.01f):0;
 		}
+		count = 0;
 	}
 	++count;
-	rot += 0.1f;
+	rot += 0.12f;
 
 	MemoryManageList<Bullet>::iterator it=bullets.begin(), end =bullets.end();
 	while (it!=end)
@@ -264,12 +264,8 @@ void TestObject::draw()
 	batch->blendMode(SpriteBatchSystem::BLEND_ADDITION1);
 	batch->begin();
 	batch->draw(position, Color::White, TestClass::WindowSizeRatio(),0);
-	MemoryManageList<Bullet>::iterator it=bullets.begin(), end =bullets.end();
-	while (it!=end)
-	{
-		it->draw();
-		++it;
-	}
+	for(auto i : bullets)
+		i.draw();
 	batch->end();
 }
 

@@ -1,6 +1,11 @@
-
-/Debug
-/Release
-/GameReform.vcxproj.filters
-/GameReform.vcxproj.user
-/GameReform.vcxproj
+Debug
+Debug/*
+Release
+x64
+x64/*
+Thumbs.db
+*.cd
+*.vcproj
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters

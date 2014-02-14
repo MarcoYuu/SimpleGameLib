@@ -2,108 +2,108 @@
 
 #include <boost/utility.hpp>
 
-#include <other/refference_count.h>
-#include <graphic/forward_declaration.h>
+#include "../other/refference_count.h"
+#include "../graphic/forward_declaration.h"
 
 // 自分のライブラリの名前空間
 namespace yuu
 {
-// グラフィック描画関連
-namespace graphic
-{
-//--------------------------------------------------------------------------------------------------
-// バッファ
-//--------------------------------------------------------------------------------------------------
-class IBufferObject
-	: public RefferenceCount<IBufferObject>
-	, boost::noncopyable
-{
-public:
-	virtual ~IBufferObject(){}
+	// グラフィック描画関連
+	namespace graphic
+	{
+		//--------------------------------------------------------------------------------------------------
+		// バッファ
+		//--------------------------------------------------------------------------------------------------
+		class IBufferObject
+			: public RefferenceCount<IBufferObject>
+			, boost::noncopyable
+		{
+		public:
+			virtual ~IBufferObject(){}
 
-	// 書き込み
-	virtual size_t write(const void *data, size_t size) = 0;
-	// バッファサイズ
-	virtual size_t length() const = 0;
-	// ハンドルの取得
-	virtual void* getHandle() = 0;
-	virtual const void* getHandle() const = 0;
-};
+			// 書き込み
+			virtual size_t write(const void *data, size_t size) = 0;
+			// バッファサイズ
+			virtual size_t length() const = 0;
+			// ハンドルの取得
+			virtual void* getHandle() = 0;
+			virtual const void* getHandle() const = 0;
+		};
 
-// 頂点バッファ
-class VertexBufferObject: public IBufferObject{
-public:
-	virtual ~VertexBufferObject(){}
-};
+		// 頂点バッファ
+		class VertexBufferObject: public IBufferObject{
+		public:
+			virtual ~VertexBufferObject(){}
+		};
 
-//--------------------------------------------------------------------------------------------------
-// 書き込み専用頂点バッファ
-//--------------------------------------------------------------------------------------------------
-class WriteOnlyVertexBufferObject : public VertexBufferObject
-{
-public:
-	static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
-	~WriteOnlyVertexBufferObject();
+		//--------------------------------------------------------------------------------------------------
+		// 書き込み専用頂点バッファ
+		//--------------------------------------------------------------------------------------------------
+		class WriteOnlyVertexBufferObject : public VertexBufferObject
+		{
+		public:
+			static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
+			~WriteOnlyVertexBufferObject();
 
-	// 戻り値は書き込めたサイズ、書き込めなかった場合負数
-	size_t write(const void *data, size_t size);
+			// 戻り値は書き込めたサイズ、書き込めなかった場合負数
+			size_t write(const void *data, size_t size);
 
-	size_t length() const;
-	void* getHandle();
-	const void* getHandle() const;
+			size_t length() const;
+			void* getHandle();
+			const void* getHandle() const;
 
-private:
-	struct Param;
-	Param *param;
+		private:
+			struct Param;
+			Param *param;
 
-	WriteOnlyVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
-};
+			WriteOnlyVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
+		};
 
-//--------------------------------------------------------------------------------------------------
-// 動的変更用頂点バッファ
-//--------------------------------------------------------------------------------------------------
-class DynamicVertexBufferObject: public VertexBufferObject
-{
-public:
-	static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
-	~DynamicVertexBufferObject();
+		//--------------------------------------------------------------------------------------------------
+		// 動的変更用頂点バッファ
+		//--------------------------------------------------------------------------------------------------
+		class DynamicVertexBufferObject: public VertexBufferObject
+		{
+		public:
+			static VertexBuffer create(GraphicDevice device, size_t size, DWORD fvf);
+			~DynamicVertexBufferObject();
 
-	// 戻り値は書き込み時の変更があった場所までのオフセット
-	size_t write(const void *data, size_t size);
-	
-	size_t length() const;
-	void* getHandle();
-	const void* getHandle() const;
+			// 戻り値は書き込み時の変更があった場所までのオフセット
+			size_t write(const void *data, size_t size);
 
-private:
-	struct Param;
-	Param *param;
+			size_t length() const;
+			void* getHandle();
+			const void* getHandle() const;
 
-	DynamicVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
-};
+		private:
+			struct Param;
+			Param *param;
 
-//--------------------------------------------------------------------------------------------------
-// インデックスバッファ
-//--------------------------------------------------------------------------------------------------
-class IndexBufferObject: public IBufferObject
-{
-public:
-	enum IndexFormat{ SIZE_16BIT, SIZE_32BIT };
-	static IndexBuffer create(GraphicDevice device, IndexFormat format, size_t size);
-	~IndexBufferObject();
+			DynamicVertexBufferObject(GraphicDevice device, size_t size, DWORD fvf);
+		};
 
-	// 戻り値は書き込めたサイズ、書き込めなかった場合負数
-	size_t write(const void *data, size_t size);
+		//--------------------------------------------------------------------------------------------------
+		// インデックスバッファ
+		//--------------------------------------------------------------------------------------------------
+		class IndexBufferObject: public IBufferObject
+		{
+		public:
+			enum IndexFormat{ SIZE_16BIT, SIZE_32BIT };
+			static IndexBuffer create(GraphicDevice device, IndexFormat format, size_t size);
+			~IndexBufferObject();
 
-	size_t length() const;
-	void* getHandle();
-	const void* getHandle() const;
+			// 戻り値は書き込めたサイズ、書き込めなかった場合負数
+			size_t write(const void *data, size_t size);
 
-private:
-	struct Param;
-	Param *param;
+			size_t length() const;
+			void* getHandle();
+			const void* getHandle() const;
 
-	IndexBufferObject(GraphicDevice device, IndexFormat format, size_t size);
-};
-}
+		private:
+			struct Param;
+			Param *param;
+
+			IndexBufferObject(GraphicDevice device, IndexFormat format, size_t size);
+		};
+	}
 }

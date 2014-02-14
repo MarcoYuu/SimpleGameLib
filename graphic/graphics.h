@@ -2,8 +2,8 @@
 #pragma once
 
 // include 
-#include <graphic/graphics_device.h>
-#include <graphic/sprite_batch.h>
-#include <graphic/color.h>
-#include <graphic/texture.h>
-#include <graphic/buffer_object.h>
+#include "graphics_device.h"
+#include "sprite_batch.h"
+#include "color.h"
+#include "texture.h"
+#include "buffer_object.h"

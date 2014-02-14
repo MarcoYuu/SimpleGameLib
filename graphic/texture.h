@@ -3,9 +3,9 @@
 
 #include <boost/utility.hpp>
 
-#include <other/refference_count.h>
-#include <other/utility.h>
-#include <graphic/forward_declaration.h>
+#include "../other/refference_count.h"
+#include "../other/utility.h"
+#include "../graphic/forward_declaration.h"
 
 // Ž©•ª‚Ìƒ‰ƒCƒuƒ‰ƒŠ‚Ì–¼‘O‹óŠÔ
 namespace yuu

@@ -3,7 +3,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
-#include <other/refference_count.h>
+#include "../other/refference_count.h"
 
 namespace yuu
 {

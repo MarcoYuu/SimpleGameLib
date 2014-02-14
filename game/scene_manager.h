@@ -5,114 +5,113 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include <game/game.h>
-#include <other/refference_count.h>
+#include "game.h"
+#include "../other/refference_count.h"
 
 namespace yuu{
-namespace game{
+	namespace game{
 
-class SceneBase;
-class SceneManagerComponent;
-typedef boost::intrusive_ptr<SceneBase> Scene;
-typedef boost::intrusive_ptr<SceneManagerComponent> SceneManager;
+		class SceneBase;
+		class SceneManagerComponent;
+		typedef boost::intrusive_ptr<SceneBase> Scene;
+		typedef boost::intrusive_ptr<SceneManagerComponent> SceneManager;
 
-//-----------------------------------------------------------------------------------------------
-// シーンマネージャ
-//-----------------------------------------------------------------------------------------------
-class SceneManagerComponent :public GameComponentBase, boost::noncopyable
-{
-public:
-	static SceneManager create();
-	~SceneManagerComponent();
+		//-----------------------------------------------------------------------------------------------
+		// シーンマネージャ
+		//-----------------------------------------------------------------------------------------------
+		class SceneManagerComponent :public GameComponentBase, boost::noncopyable
+		{
+		public:
+			static SceneManager create();
+			~SceneManagerComponent();
 
-	void addScene(Scene scene);
-	void update(float time);
-	void draw(float time);
-	void removeScene( Scene scene );
-	void removeScene( SceneBase *scene );
-	size_t getSceneNum() const;
+			void addScene(Scene scene);
+			void update(float time);
+			void draw(float time);
+			void removeScene( Scene scene );
+			void removeScene( SceneBase *scene );
+			size_t getSceneNum() const;
 
-private:
-	typedef std::list<Scene> SceneList;
-	SceneList m_scene;
-	
-	SceneManagerComponent();
-};
+		private:
+			typedef std::list<Scene> SceneList;
+			SceneList m_scene;
 
-//-----------------------------------------------------------------------------------------------
-// ゲームシーン
-//-----------------------------------------------------------------------------------------------
-//
-// アクティブ：
-// 　　シーンスタックの一番上にいてかつフォーカスを得ている状態です
-// 　　フォーカスを得ることができないとき、getState()はACTIVEをかえす
-// 　　可能性がありますが、isActive()はfalseとなります
-// 非アクティブ：
-// 　　シーンスタックで二番目以降のシーンの状態です
-// 　　この状態では描画・更新ともに基本的には行われませんが
-// 　　トップのシーンがPopup状態の時、その下のシーンは描画のみ行われます
-// 
-enum SceneState{
-	TRANSITION_ON,	// シーンがアクティブになっている途中です		getState()!= 0,1 減少中
-	TRANSITION_OFF,	// シーンが非アクティブになっている途中です	getState()!= 0,1 上昇中
-	ACTIVE,			// シーンは完全にアクティブです				getState()!= 0
-	HIDDEN			// シーンは完全に非アクティブです				getState()!= 1 
-};
+			SceneManagerComponent();
+		};
 
-class SceneBase :public RefferenceCount<SceneBase>, boost::noncopyable
-{
-public:
-	virtual ~SceneBase(){}
+		//-----------------------------------------------------------------------------------------------
+		// ゲームシーン
+		//-----------------------------------------------------------------------------------------------
+		//
+		// アクティブ：
+		// 　　シーンスタックの一番上にいてかつフォーカスを得ている状態です
+		// 　　フォーカスを得ることができないとき、getState()はACTIVEをかえす
+		// 　　可能性がありますが、isActive()はfalseとなります
+		// 非アクティブ：
+		// 　　シーンスタックで二番目以降のシーンの状態です
+		// 　　この状態では描画・更新ともに基本的には行われませんが
+		// 　　トップのシーンがPopup状態の時、その下のシーンは描画のみ行われます
+		// 
+		enum SceneState{
+			TRANSITION_ON,	// シーンがアクティブになっている途中です		getState()!= 0,1 減少中
+			TRANSITION_OFF,	// シーンが非アクティブになっている途中です	getState()!= 0,1 上昇中
+			ACTIVE,			// シーンは完全にアクティブです				getState()!= 0
+			HIDDEN			// シーンは完全に非アクティブです				getState()!= 1 
+		};
 
-	bool isPopup() const;
-	bool isExitting() const;
-	bool isActive() const;
-	bool hasFocus() const;
-	SceneState getState() const;
-	double getTransitionState() const; 
+		class SceneBase :public RefferenceCount<SceneBase>, boost::noncopyable
+		{
+		public:
+			virtual ~SceneBase(){}
 
-	// マネージャによって更新時に常に呼び出される
-	// オーバーライド先で必ず呼び出さなくてはならない
-	// 第二引数がtrueのときアクティブでなくなる可能性がある
-	// 第三引数がtrueのときsetTransitionOffTimeに指定した
-	// 時間以内にアクティブでなくなる可能性がある
-	virtual void update(float time , bool other_has_focus, bool covered_by_other);
+			bool isPopup() const;
+			bool isExitting() const;
+			bool isActive() const;
+			bool hasFocus() const;
+			SceneState getState() const;
+			double getTransitionState() const; 
 
-	// アクティブな時のみ呼び出される
-	virtual void updateOnActive(float time){}
+			// マネージャによって更新時に常に呼び出される
+			// オーバーライド先で必ず呼び出さなくてはならない
+			// 第二引数がtrueのときアクティブでなくなる可能性がある
+			// 第三引数がtrueのときsetTransitionOffTimeに指定した
+			// 時間以内にアクティブでなくなる可能性がある
+			virtual void update(float time , bool other_has_focus, bool covered_by_other);
 
-	// 状態がHIDDENでないときのみ呼び出される
-	// いかなる時も描画が必要な時、updateをハンドルし
-	// 第三引数を常にfalseに指定する必要がある
-	virtual void draw(float time){}
+			// アクティブな時のみ呼び出される
+			virtual void updateOnActive(float time){}
 
-	GraphicDevice getGraphicDevice() const;
-	Controller getController() const;
+			// 状態がHIDDENでないときのみ呼び出される
+			// いかなる時も描画が必要な時、updateをハンドルし
+			// 第三引数を常にfalseに指定する必要がある
+			virtual void draw(float time){}
 
-	// このシーンを終了します
-	void exit();
+			GraphicDevice getGraphicDevice() const;
+			Controller getController() const;
 
-protected:
-	SceneBase(SceneManagerComponent &manager);
-	SceneManagerComponent& getSceneManager() const; 
+			// このシーンを終了します
+			void exit();
 
-	void setIsPopup(bool flag);
-	void setTransitionOnTime(double time);
-	void setTransitionOffTime(double time);
+		protected:
+			SceneBase(SceneManagerComponent &manager);
+			SceneManagerComponent& getSceneManager() const; 
 
-private:
-	bool m_is_popup;
-	bool m_is_exitting;
-	bool m_have_focus;
-	double m_transition_on_time;
-	double m_transition_off_time;
-	double m_transition_state; //Active:0, Hidden:1 
+			void setIsPopup(bool flag);
+			void setTransitionOnTime(double time);
+			void setTransitionOffTime(double time);
 
-	SceneState m_state;
-	SceneManagerComponent &m_manager;
+		private:
+			bool m_is_popup;
+			bool m_is_exitting;
+			bool m_have_focus;
+			double m_transition_on_time;
+			double m_transition_off_time;
+			double m_transition_state; //Active:0, Hidden:1 
 
-	bool updateTransition(float time, double transition_time, int direction);
-};
+			SceneState m_state;
+			SceneManagerComponent &m_manager;
 
-}
+			bool updateTransition(float time, double transition_time, int direction);
+		};
+	}
 }

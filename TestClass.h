@@ -4,17 +4,19 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <audio/audio_creator.h>
-#include <input/input_direct_input.h>
+#include "audio/audio_creator.h"
 
-#include <graphic/graphics_device.h>
-#include <graphic/sprite_batch.h>
+#include "input/input_direct_input.h"
 
-#include <other/frame_rate_counter.h>
-#include <other/memory_manage_list.h>
-#include <other/timer.h>
-#include <game/game.h>
-#include <game/scene_manager.h>
+#include "graphic/graphics_device.h"
+#include "graphic/sprite_batch.h"
+
+#include "other/frame_rate_counter.h"
+#include "other/memory_manage_list.h"
+#include "other/timer.h"
+
+#include "game/game.h"
+#include "game/scene_manager.h"
 
 using namespace yuu;
 using namespace yuu::app;
@@ -107,7 +109,8 @@ private:
 	typedef SceneBase base;
 
 	SpriteBatch batch;
-	Texture tex[2];
+	Texture tex;
+	WritableTexture w_tex;
 	Color color;
 
 	float rot;
